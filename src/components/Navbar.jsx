@@ -17,6 +17,7 @@ export default function Navbar() {
       </div>
       <div className="wf-nav-actions">
         <a href="/login" className="wf-nav-link">Log in</a>
+        <a href="/signup" className="wf-nav-link">Sign up</a>
         <a href="/contact" className="wf-nav-link">Contact</a>
         <a href="/career-test" className="wf-nav-btn">Get started — it's free</a>
       </div>
