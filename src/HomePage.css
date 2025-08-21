@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
+/* ---------- Base Styles ---------- */
 body {
   font-family: 'Inter', Arial, Helvetica, sans-serif;
   background: #fff;
@@ -7,7 +8,7 @@ body {
   margin: 0;
 }
 
-/* --- Navbar styles: you must style your navbar for proper spacing and alignment --- */
+/* ---------- Navbar Desktop Styles ---------- */
 .wf-navbar {
   display: flex;
   align-items: center;
@@ -91,7 +92,12 @@ body {
   box-shadow: 0 4px 18px rgba(65,119,246,0.11);
 }
 
-/* --- Hero Section --- */
+/* Hide hamburger button by default (desktop) */
+.wf-nav-hamburger {
+  display: none;
+}
+
+/* ---------- Hero Section Styles ---------- */
 .main-hero {
   width: 100%;
   background: #fff;
@@ -99,7 +105,6 @@ body {
   padding: 0;
 }
 
-/* --- Hero Animation --- */
 .hero-content {
   max-width: 1200px;
   margin: 0 auto;
@@ -110,8 +115,6 @@ body {
   box-sizing: border-box;
   position: relative;
   text-align: left;
-
-  /* Animation */
   opacity: 0;
   transform: translateY(48px);
   animation: heroFadeIn 1s cubic-bezier(.4,0,.2,1) 0.1s forwards;
@@ -136,11 +139,10 @@ body {
 
 .hero-heading {
   font-family: 'Inter', Arial, Helvetica, sans-serif !important;
-  /* font-weight: 900 !important;        Super bold */
-  font-size: 6.25rem !important;      /* Large, visually matches Webflow */
-  color: #181818 !important;          /* Solid black */
+  font-size: 6.25rem !important;
+  color: #181818 !important;
   line-height: 1.05 !important;
-  letter-spacing: -2px !important;    /* Slightly condensed */
+  letter-spacing: -2px !important;
   text-align: left !important;
   margin-top: 0 !important;
   margin-bottom: 38px !important;
@@ -197,7 +199,7 @@ body {
   }
 }
 
-/* Responsive adjustments */
+/* ---------- Responsive Styles ---------- */
 @media (max-width: 1100px) {
   .wf-navbar { padding: 0 18px; }
   .hero-content {
@@ -212,14 +214,529 @@ body {
 }
 
 @media (max-width: 700px) {
-  .wf-navbar { padding: 0 4px; }
-  .hero-content {
-    padding-left: 8px;
-    padding-right: 8px;
-    padding-top: 36px;
-    padding-bottom: 36px;
+  /* ---------- Navbar Mobile Styles ---------- */
+  .wf-navbar {
+    padding: 0 16px;
+    height: 60px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    justify-content: space-between;
   }
-  .hero-heading { font-size: 2.1rem; }
-  .hero-overline { font-size: 1rem; }
-  .hero-btn { font-size: 0.93rem; padding: 10px 22px; right: 8px; }
+  .wf-logo { gap: 8px; }
+  .wf-logo-title {
+    font-size: 1.13rem;
+    font-weight: bold;
+  }
+  .wf-nav-hamburger {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    height: 36px;
+    width: 36px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: auto;
+  }
+  .wf-nav-hamburger span {
+    display: block;
+    width: 28px;
+    height: 3px;
+    background: #222;
+    border-radius: 2px;
+    margin-bottom: 5px;
+  }
+  .wf-nav-links,
+  .wf-nav-actions {
+    display: none !important;
+  }
+
+  /* ---------- Mobile Menu Overlay Styles ---------- */
+  .wf-navbar-mobile-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #fff;
+    z-index: 9999;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    animation: navMobileSlide .3s;
+    padding-bottom: 0;
+  }
+  @keyframes navMobileSlide {
+    from { opacity: 0; transform: translateY(-10px);}
+    to { opacity: 1; transform: translateY(0);}
+  }
+  .wf-navbar-mobile-menu-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 20px 18px 0 18px;
+    height: 60px;
+    gap: 18px;
+  }
+  .wf-navbar-mobile-contact {
+    font-size: 1.13rem;
+    font-weight: 500;
+    text-decoration: underline;
+    color: #1a1a1a;
+    margin-right: 8px;
+  }
+  .wf-navbar-mobile-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #222;
+    margin-left: 8px;
+    padding: 0;
+  }
+  .wf-navbar-mobile-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.22rem;
+    color: #222;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 20px 18px;
+    border-bottom: 1px solid #eee;
+    background: none;
+    cursor: pointer;
+  }
+  .wf-navbar-mobile-chevron {
+    margin-left: 8px;
+    font-size: 1.15rem;
+    color: #222;
+  }
+  .wf-navbar-mobile-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    background: #fff;
+    box-shadow: 0 -2px 16px rgba(0,0,0,0.07);
+    padding: 22px 0 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+  .wf-navbar-mobile-footer-btn {
+    width: 90vw;
+    max-width: 330px;
+    padding: 13px 0;
+    font-size: 1.13rem;
+    font-weight: 500;
+    background: #fff;
+    color: #222;
+    border: 1.7px solid #e0e3e6;
+    border-radius: 10px;
+    margin: 0 auto;
+    text-align: center;
+    cursor: pointer;
+  }
+  .wf-navbar-mobile-footer-main {
+    width: 90vw;
+    max-width: 330px;
+    padding: 13px 0;
+    font-size: 1.13rem;
+    font-weight: 600;
+    background: #326cf9;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    margin: 0 auto;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(50,108,249,0.08);
+    cursor: pointer;
+  }
+
+  /* ---------- Hero Section Mobile Styles ---------- */
+  .hero-content,
+  .homepage-container,
+  .main-hero,
+  .main-content {
+    padding: 0 16px !important;
+    max-width: 100vw !important;
+    width: 100vw !important;
+    margin: 0 auto !important;
+    box-sizing: border-box;
+  }
+  .hero-content h1,
+  .hero-content .main-heading {
+    font-size: 2.15rem;
+    font-weight: 900;
+    line-height: 1.15;
+    text-align: left;
+    margin-top: 24px;
+    margin-bottom: 16px;
+  }
+  .hero-content h2,
+  .hero-content .sub-heading {
+    font-size: 1.02rem;
+    font-weight: 500;
+    color: #757575;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: left;
+    letter-spacing: 1px;
+  }
+  .hero-content p {
+    font-size: 1.04rem;
+    line-height: 1.7;
+    color: #222;
+    margin-bottom: 28px;
+    text-align: left;
+    font-weight: 400;
+  }
+  .homepage-cta-btn, .hero-content .cta-btn {
+    width: 90vw;
+    max-width: 320px;
+    margin: 0 auto 38px auto;
+    padding: 13px 0;
+    font-size: 1.12rem;
+    font-weight: 600;
+    background: #326cf9;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(50,108,249,0.08);
+    display: block;
+    cursor: pointer;
+  }
+
+  /* Logo grid */
+  .homepage-logo-grid, .hero-content .logo-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 12px;
+    margin-top: 32px;
+    margin-bottom: 18px;
+    justify-items: center;
+    align-items: center;
+  }
+  .homepage-logo-grid img, .hero-content .logo-section img {
+    max-width: 110px;
+    height: auto;
+    margin: 0 auto;
+  }
+  .homepage-logo-grid .logo-label, .hero-content .logo-section .logo-label {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #222;
+    text-align: center;
+    margin-top: 8px;
+    margin-bottom: 0;
+  }
+
+  /* Footer badge */
+  .homepage-made-in, .hero-content .made-in-badge {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 7px 14px;
+    font-size: 1.02rem;
+    font-weight: 600;
+    z-index: 2;
+  }
+
+  /* Stack children vertically */
+  .homepage-row, .homepage-flex {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .homepage-title, .homepage-header-title {
+    font-size: 1.4rem !important;
+    text-align: center !important;
+    padding: 0 6vw !important;
+  }
+  .homepage-subtitle, .homepage-header-desc {
+    font-size: 1.05rem !important;
+    text-align: center !important;
+    padding: 0 6vw !important;
+  }
+  .homepage-img, .homepage-header-img, img {
+    max-width: 92vw !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 auto !important;
+  }
+  .homepage-btn, .homepage-action-btn {
+    width: 98vw !important;
+    max-width: 350px !important;
+    margin: 14px auto !important;
+    font-size: 1.05rem !important;
+  }
+  .homepage-section {
+    padding: 30px 0 28px 0 !important;
+  }
+  .homepage-sidebar, .homepage-extra-panel {
+    display: none !important;
+  }
+  .homepage-card, .homepage-feature-card {
+    width: 94vw !important;
+    max-width: 380px !important;
+    margin: 18px auto !important;
+    border-radius: 14px !important;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08) !important;
+  }
+  .homepage-navbar {
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100vw !important;
+  }
+  .homepage-navbar-logo {
+    margin: 12px 0 !important;
+  }
+}
+
+.wf-navbar-mobile-menu {
+  /* ...your existing styles... */
+  transform: translateY(-40px);
+  opacity: 0;
+  transition: transform 0.36s cubic-bezier(.5,1.5,.6,1), opacity 0.38s cubic-bezier(.4,1.2,.5,1);
+}
+
+.wf-navbar-mobile-menu--animate {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+@media (max-width: 700px) {
+  /* Headline: limit size, add spacing */
+  .hero-heading {
+    font-size: 2.35rem !important;
+    font-weight: 900 !important;
+    line-height: 1.12 !important;
+    margin-top: 24px !important;
+    margin-bottom: 22px !important;
+    letter-spacing: -1px !important;
+    word-break: break-word;
+    text-align: left !important;
+  }
+
+  /* Subtext: slightly smaller, better spacing */
+  .hero-subtext {
+    font-size: 1.07rem !important;
+    line-height: 1.65 !important;
+    color: #222 !important;
+    margin-bottom: 34px !important;
+    margin-top: 0 !important;
+    max-width: 94vw !important;
+    text-align: left !important;
+  }
+
+  /* CTA Button: full width, spacing */
+  .hero-btn {
+    font-size: 1.05rem !important;
+    padding: 13px 0 !important;
+    width: 95vw !important;
+    max-width: 350px !important;
+    margin: 12px auto 22px auto !important;
+    position: static !important;
+    display: block !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    background: #4177f6 !important;
+  }
+
+  /* Footer: card style, spacing */
+  .careerflow-footer {
+    width: 97vw;
+    max-width: 99vw;
+    margin: 0 auto 14px auto;
+    padding: 14px 12px 10px 12px;
+    border-radius: 11px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    background: #fff;
+    font-size: 1.05rem;
+    color: #181818;
+    text-align: left;
+    position: static;
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .careerflow-footer b,
+  .careerflow-footer strong {
+    font-weight: 700;
+    font-size: 1.12rem;
+  }
+  .careerflow-footer .footer-social {
+    margin-top: 10px;
+    display: flex;
+    gap: 11px;
+  }
+  .careerflow-footer .footer-social a {
+    color: #4177f6;
+    font-size: 1.22rem;
+    transition: color 0.2s;
+  }
+  .careerflow-footer .footer-social a:hover {
+    color: #2851be;
+  }
+  .careerflow-footer .footer-email {
+    color: #4177f6;
+    font-size: 1.07rem;
+    word-break: break-all;
+  }
+}
+
+/* ---------- Mobile Content Spacing & Readability ---------- */
+@media (max-width: 700px) {
+  /* Navbar and header area */
+  .wf-navbar {
+    margin-bottom: 0 !important;
+  }
+  .wf-logo-title {
+    font-size: 1.13rem;
+    font-weight: bold;
+    margin-left: 6px;
+  }
+  .hero-overline {
+    margin-top: 10px !important;
+    margin-bottom: 28px !important;
+    font-size: 1.07rem !important;
+    letter-spacing: 2px !important;
+    color: #757575 !important;
+    text-align: left !important;
+    padding: 0 2px;
+  }
+
+  /* Main headline */
+  .hero-heading {
+    font-size: 2.15rem !important;
+    font-weight: 900 !important;
+    line-height: 1.18 !important;
+    margin-top: 8px !important;
+    margin-bottom: 22px !important;
+    letter-spacing: -1px !important;
+    word-break: break-word;
+    text-align: left !important;
+    padding: 0 2px;
+  }
+
+  /* Subtext paragraph */
+  .hero-subtext {
+    font-size: 1.07rem !important;
+    line-height: 1.6 !important;
+    color: #222 !important;
+    margin-bottom: 32px !important;
+    margin-top: 0 !important;
+    max-width: 98vw !important;
+    padding: 0 2px;
+    text-align: left !important;
+  }
+
+  /* CTA button */
+  .hero-btn, .homepage-cta-btn {
+    font-size: 1.11rem !important;
+    padding: 15px 0 !important;
+    width: 85vw !important;
+    max-width: 340px !important;
+    margin: 22px auto 30px auto !important;
+    position: static !important;
+    display: block !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    background: #4177f6 !important;
+    box-shadow: 0 2px 12px rgba(65,119,246,0.10);
+  }
+
+  /* Card style for footer/contact */
+  .careerflow-footer {
+    width: 96vw;
+    max-width: 99vw;
+    margin: 8px auto 16px auto;
+    padding: 18px 14px 12px 14px;
+    border-radius: 13px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    background: #fff;
+    font-size: 1.07rem;
+    color: #181818;
+    text-align: left;
+    position: static;
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .careerflow-footer b,
+  .careerflow-footer strong {
+    font-weight: 700;
+    font-size: 1.14rem;
+    display: block;
+    margin-bottom: 7px;
+  }
+  .careerflow-footer .footer-social {
+    margin-top: 13px;
+    display: flex;
+    gap: 16px;
+  }
+  .careerflow-footer .footer-social a {
+    color: #4177f6;
+    font-size: 1.32rem;
+    transition: color 0.2s;
+  }
+  .careerflow-footer .footer-social a:hover {
+    color: #2851be;
+  }
+  .careerflow-footer .footer-email {
+    color: #4177f6;
+    font-size: 1.07rem;
+    word-break: break-all;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .careerflow-footer .footer-copyright {
+    font-size: 0.97rem;
+    color: #757575;
+    text-align: center;
+    margin-top: 16px;
+    margin-bottom: -7px;
+    width: 100%;
+    display: block;
+  }
+}
+
+@media (max-width: 700px) {
+  /* Fix logo size for mobile hero/banner */
+  .hero-logo, .homepage-hero-logo, .main-hero-logo, .wf-hero-logo {
+    max-width: 88px !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 auto 10px auto !important;
+    /* If you have an SVG, you can also set max-width:60vw; for responsive */
+  }
+
+  /* Add spacing below navbar and above hero/main content */
+  .main-hero,
+  .hero-content,
+  .homepage-content {
+    margin-top: 22px !important;
+  }
+
+  /* If you have a container wrapping the hero/logo, add a bit more space */
+  .homepage-hero-logo-container,
+  .hero-logo-container {
+    margin-top: 12px !important;
+    margin-bottom: 6px !important;
+  }
+
+  /* Reduce headline top margin for balance */
+  .hero-heading {
+    margin-top: 14px !important;
+  }
 }
