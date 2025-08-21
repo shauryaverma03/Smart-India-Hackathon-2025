@@ -1,38 +1,68 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./AuthPage.css";
 
+// Card data for animation
+const cards = [
+  {
+    img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80",
+    title: "Build Muscle. Burn Calories. Get Results.",
+    cost: "$6M",
+    desc: "REDUCTION IN DEV COSTS",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+    title: "10X",
+    cost: "",
+    desc: "FASTER LAUNCHES",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=400&q=80",
+    title: "99.99%",
+    cost: "",
+    desc: "UPTIME GUARANTEE",
+  },
+];
+
 export default function AuthPage({ type }) {
   const isSignup = type === "signup";
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    // Automatically cycle to next card every 3 seconds
+    const timer = setInterval(() => {
+      setActive((prev) => (prev + 1) % cards.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="auth-root-fullscreen">
+      {/* Left side with animated cards (desktop/laptop view) */}
       <div className="auth-left">
         <div className="auth-card-slider">
-          <div className="auth-card auth-card-active">
-            <img
-              src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80"
-              alt="Card1"
-              className="auth-card-img"
-            />
-            <div className="auth-card-content">
-              <h3>Build Muscle. Burn Calories. Get Results.</h3>
-              <div className="auth-card-cost">$6M</div>
-              <div className="auth-card-cost-desc">REDUCTION IN DEV COSTS</div>
+          {cards.map((card, idx) => (
+            <div
+              key={idx}
+              className={`auth-card ${
+                idx === active
+                  ? "auth-card-active"
+                  : idx === (active + 1) % cards.length
+                  ? "auth-card-next"
+                  : "auth-card-inactive"
+              }`}
+            >
+              <img src={card.img} alt={`Card${idx + 1}`} className="auth-card-img" />
+              <div className="auth-card-content">
+                <h3>{card.title}</h3>
+                {card.cost && <div className="auth-card-cost">{card.cost}</div>}
+                <div className="auth-card-cost-desc">{card.desc}</div>
+              </div>
             </div>
-          </div>
-          <div className="auth-card">
-            <img
-              src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80"
-              alt="Card2"
-              className="auth-card-img"
-            />
-            <div className="auth-card-content">
-              <h3>10X</h3>
-              <div className="auth-card-cost-desc">FASTER LAUNCHES</div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
+      {/* Right side: Signup/Login form */}
       <div className="auth-right">
         <div className="auth-form-box">
           <img
@@ -48,7 +78,7 @@ export default function AuthPage({ type }) {
               alt="Google"
               width={20}
               height={20}
-              style={{ marginRight: 6, verticalAlign: "middle" }}
+              style={{ marginRight: 8, verticalAlign: "middle" }}
             />
             {isSignup ? "Sign up with Google" : "Log in with Google"}
           </button>
