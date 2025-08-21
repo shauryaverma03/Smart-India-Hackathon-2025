@@ -7,7 +7,7 @@ export default function Navbar() {
   return (
     <nav className="wf-navbar">
       <div className="wf-logo">
-        <img src="/logo192.png" alt="logo" style={{ height: 32 }} />
+        <img src="/logo.png" alt="CareerFlow Logo" className="hero-logo" />
         <span className="wf-logo-title">CareerFlow</span>
       </div>
       {/* Hamburger for mobile */}

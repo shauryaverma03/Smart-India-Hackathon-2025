@@ -36,7 +36,7 @@ export default function AuthPage({ type }) {
       <div className="auth-right">
         <div className="auth-form-box">
           <img
-            src="/logo192.png"
+            src="/logo.png"
             alt="Logo"
             className="auth-logo"
             style={{ height: 38, marginBottom: 18 }}

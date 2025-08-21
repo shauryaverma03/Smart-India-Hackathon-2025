@@ -21,7 +21,7 @@ export default function LoginPage() {
         <div className={`auth-login-card${show ? " show" : ""}${hover ? " hovered" : ""}`}>
           <Link to="/">
             <img
-              src="/logo192.png"
+              src="/logo.png"
               alt="CareerFlow"
               style={{height:36, marginBottom:18, cursor: "pointer"}}
             />
@@ -45,7 +45,7 @@ export default function LoginPage() {
         <div className={`auth-login-form-box${show ? " show" : ""}`}>
           <Link to="/">
             <img
-              src="/logo192.png"
+              src="/logo.png"
               alt="Logo"
               className="auth-login-logo"
               style={{ height: 38, marginBottom: 18, cursor: "pointer" }}
