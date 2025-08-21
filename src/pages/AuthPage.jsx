@@ -44,11 +44,11 @@ export default function AuthPage({ type }) {
           <h2 className="auth-title">Welcome to CareerFlow</h2>
           <button className="auth-google-btn">
             <img
-              src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+              src="https://www.citypng.com/public/uploads/preview/google-logo-icon-gsuite-hd-701751694791470gzbayltphh.png"
               alt="Google"
               width={20}
               height={20}
-              style={{ marginRight: 8 }}
+              style={{ marginRight: 6, verticalAlign: "middle" }}
             />
             {isSignup ? "Sign up with Google" : "Log in with Google"}
           </button>
@@ -63,11 +63,6 @@ export default function AuthPage({ type }) {
           <button className="auth-continue-btn">
             {isSignup ? "Continue" : "Log in"}
           </button>
-          <p className="auth-policy">
-            Signing up for a CareerFlow account means you agree to the{" "}
-            <a href="/">Privacy Policy</a> and{" "}
-            <a href="/">Terms of Service</a>.
-          </p>
           <p className="auth-login-link">
             {isSignup ? (
               <>Already have an account? <Link to="/login">Log in</Link></>
@@ -75,13 +70,6 @@ export default function AuthPage({ type }) {
               <>Don't have an account? <Link to="/signup">Sign up</Link></>
             )}
           </p>
-          <div className="auth-enterprise-box">
-            <span>
-              <span role="img" aria-label="lock" style={{ marginRight: 5 }}>🔒</span>
-              Building an Enterprise site?
-            </span>
-            <button className="auth-sales-btn">Contact sales</button>
-          </div>
         </div>
       </div>
     </div>

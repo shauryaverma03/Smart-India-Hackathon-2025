@@ -293,20 +293,24 @@
   }
 }
 
+
+
 @media (max-width: 700px) {
-  .auth-login-google-row {
+  .auth-login-oauth-btn {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     width: 100% !important;
-  }
-  .auth-login-oauth-btn {
+    max-width: 320px !important;
+    font-size: 1.09rem !important;
+    padding: 12px 0 !important;
+    box-sizing: border-box !important;
     margin-left: auto !important;
     margin-right: auto !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 95vw !important;
-    max-width: 320px !important;
+  }
+  .auth-login-oauth-btn img {
+    margin-right: 8px !important;
+    margin-left: 0 !important;
+    vertical-align: middle !important;
   }
 }
