@@ -65,12 +65,14 @@ export default function AuthPage({ type }) {
       {/* Right side: Signup/Login form */}
       <div className="auth-right">
         <div className="auth-form-box">
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className="auth-logo"
-            style={{ height: 38, marginBottom: 18 }}
-          />
+          <Link to="/">
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="auth-logo"
+              style={{ height: 38, marginBottom: 18, cursor: "pointer" }}
+            />
+          </Link>
           <h2 className="auth-title">Welcome to CareerFlow</h2>
           <button className="auth-google-btn">
             <img
