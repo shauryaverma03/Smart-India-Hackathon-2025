@@ -3,10 +3,14 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import AuthPage from "./pages/AuthPage";
 import LoginPage from "./pages/LoginPage";
+import Dashboard from "./pages/Dashboard"; // <-- Import Dashboard
 import { Routes, Route } from "react-router-dom";
 import "./HomePage.css";
 
 export default function App() {
+  // For demo, we'll hardcode user name. Replace with actual user data
+  const user = { name: "Shaurya" }; 
+
   return (
     <Routes>
       {/* Homepage: WITH Navbar and Footer */}
@@ -37,6 +41,8 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       {/* Signup page: FULLSCREEN, NO Navbar/Footer */}
       <Route path="/signup" element={<AuthPage type="signup" />} />
+      {/* Dashboard page: FULLSCREEN, NO Navbar/Footer */}
+      <Route path="/dashboard" element={<Dashboard user={user} />} />
     </Routes>
   );
 }
