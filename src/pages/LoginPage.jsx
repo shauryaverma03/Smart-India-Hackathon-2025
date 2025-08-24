@@ -1,18 +1,54 @@
+// src/pages/LoginPage/LoginPage.jsx
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./LoginPage.css";
+import { auth } from "../firebase";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import Notification from "../components/Notification";
 
 export default function LoginPage() {
   const [hover, setHover] = useState(false);
   const [show, setShow] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
     setTimeout(() => setShow(true), 20);
   }, []);
 
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      console.log("User signed in: ", result.user);
+
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 3000);
+
+      // Redirect after a short delay
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1000);
+
+    } catch (error) {
+      console.error("Error during Google sign-in: ", error);
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      const email = error.customData ? error.customData.email : 'N/A';
+      const credential = GoogleAuthProvider.credentialFromError(error);
+      console.error(`[${errorCode}] ${errorMessage} (Email: ${email})`, credential);
+    }
+  };
+
   return (
     <div className="auth-login-root">
+      <Notification message={
+        <span>
+          <span style={{ marginRight: '10px', fontSize: '1.2em' }}>✅</span>
+          Welcome to CareerFlow!
+        </span>
+      } show={showNotification} />
       <div
         className="auth-login-left"
         onMouseEnter={() => setHover(true)}
@@ -23,7 +59,7 @@ export default function LoginPage() {
             <img
               src="/logo.png"
               alt="CareerFlow"
-              style={{height:36, marginBottom:18, cursor: "pointer"}}
+              style={{ height: 36, marginBottom: 18, cursor: "pointer" }}
             />
           </Link>
           <h2 className="auth-login-card-title">
@@ -37,7 +73,7 @@ export default function LoginPage() {
             className={`auth-login-register-btn${hover ? " hovered" : ""}`}
             href="/career-test"
           >
-            Take the free Career Test <span style={{marginLeft:4}}>↗</span>
+            Take the free Career Test <span style={{ marginLeft: 4 }}>↗</span>
           </a>
         </div>
       </div>
@@ -52,7 +88,7 @@ export default function LoginPage() {
             />
           </Link>
           <h2 className="auth-login-title">Log in to your account</h2>
-          <button className="auth-login-oauth-btn">
+          <button className="auth-login-oauth-btn" onClick={handleGoogleSignIn}>
             <img
               src="https://www.citypng.com/public/uploads/preview/google-logo-icon-gsuite-hd-701751694791470gzbayltphh.png"
               alt="Google"
@@ -84,14 +120,12 @@ export default function LoginPage() {
               onClick={() => setShowPassword((view) => !view)}
             >
               {showPassword ? (
-                // eye open SVG
-                <svg height="18" width="18" viewBox="0 0 24 24" style={{verticalAlign:"middle"}} fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg height="18" width="18" viewBox="0 0 24 24" style={{ verticalAlign: "middle" }} fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
                   <circle cx="12" cy="12" r="3"/>
                 </svg>
               ) : (
-                // eye closed SVG
-                <svg height="18" width="18" viewBox="0 0 24 24" style={{verticalAlign:"middle"}} fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg height="18" width="18" viewBox="0 0 24 24" style={{ verticalAlign: "middle" }} fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.73 21.73 0 0 1 5.06-7.06"/>
                   <path d="M1 1l22 22"/>
                   <path d="M9.53 9.53A3 3 0 0 0 12 15a3 3 0 0 0 2.47-5.47"/>

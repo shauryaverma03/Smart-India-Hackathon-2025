@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaChevronDown, FaTimes } from "react-icons/fa";
+import "./Navbar.css";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
