@@ -4,6 +4,8 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage"
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -11,20 +13,17 @@ import { getAuth } from "firebase/auth";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-
-  apiKey: "AIzaSyB4yToRBANxHTKf76kTUguoGtVi6hpjxdk",
-  authDomain: "carrerflow-b4eb6.firebaseapp.com",
-  projectId: "carrerflow-b4eb6",
-  storageBucket: "carrerflow-b4eb6.firebasestorage.app",
-  messagingSenderId: "175833723035",
-  appId: "1:175833723035:web:a4a18d2c66e5576fba163e",
-  measurementId: "G-891NKCRDK4"
-
-
-
+  apiKey: "AIzaSyCQ0X7aXiiBxDLCXf_rp3CpNelypTpMAUo",
+  authDomain: "carrerflow-a73c1.firebaseapp.com",
+  projectId: "carrerflow-a73c1",
+  storageBucket: "carrerflow-a73c1.firebasestorage.app",
+  messagingSenderId: "391235321572",
+  appId: "1:391235321572:web:5895cd68d3487c038bb6f1",
+  measurementId: "G-98NVRH3QQB"
 };
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 export const auth = getAuth(app); // Export auth instance
+export const db = getFirestore(app);
+export const storage = getStorage(app);

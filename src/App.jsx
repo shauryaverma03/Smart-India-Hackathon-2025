@@ -3,13 +3,14 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import AuthPage from "./pages/AuthPage";
 import LoginPage from "./pages/LoginPage";
-import Dashboard from "./pages/Dashboard"; // <-- Import Dashboard
+import Dashboard from "./pages/Dashboard";
+import ChatPage from "./pages/ChatPage"; // 1. Import the new ChatPage component
 import { Routes, Route } from "react-router-dom";
 import "./HomePage.css";
 
 export default function App() {
-  // For demo, we'll hardcode user name. Replace with actual user data
-  const user = { name: "Shaurya" }; 
+  // 2. Remove the old hardcoded user object, as Dashboard now gets it from Firebase
+  // const user = { name: "Shaurya" }; 
 
   return (
     <Routes>
@@ -30,7 +31,7 @@ export default function App() {
                   With our AI-powered platform, you can explore, analyze, and optimize your career journey. 
                   Get personalized guidance, skill gap analysis, and curated resources—built just for Indian students.
                 </p>
-                <a href="/career-test" className="hero-btn">Start building</a>
+                <a href="/signup" className="hero-btn">Start building</a>
               </section>
             </main>
             <Footer />
@@ -41,8 +42,13 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       {/* Signup page: FULLSCREEN, NO Navbar/Footer */}
       <Route path="/signup" element={<AuthPage type="signup" />} />
+      
       {/* Dashboard page: FULLSCREEN, NO Navbar/Footer */}
-      <Route path="/dashboard" element={<Dashboard user={user} />} />
+      {/* 4. Remove the unused 'user' prop from the Dashboard */}
+      <Route path="/dashboard" element={<Dashboard />} />
+
+      {/* 3. Add the new route for the ChatPage */}
+      <Route path="/chat/:chatId" element={<ChatPage />} />
     </Routes>
   );
 }

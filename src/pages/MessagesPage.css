@@ -1,0 +1,44 @@
+.messages-container {
+  width: 100%;
+  padding: 20px 40px;
+}
+.messages-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #232945;
+  margin-bottom: 32px;
+}
+.connections-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 600px;
+}
+.connection-card {
+  background: var(--cf-card-bg);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+.connection-card:hover {
+  background-color: #f9f9fb;
+  box-shadow: var(--cf-shadow);
+}
+.connection-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+}
+.connection-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #3a425d;
+}
+.no-connections-message {
+  color: #5a6482;
+  font-size: 1.1rem;
+}

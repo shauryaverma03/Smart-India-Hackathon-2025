@@ -1,0 +1,126 @@
+.notifications-container {
+  width: 100%;
+  padding: 20px 40px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.notifications-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #232945;
+  margin-bottom: 16px;
+}
+
+.notifications-subtitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #3a425d;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.requests-list, .notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 800px;
+}
+
+.request-card {
+  background: var(--cf-card-bg);
+  border-radius: 12px;
+  box-shadow: var(--cf-shadow);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  border: 1px solid #eef0f4;
+}
+
+.request-text {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #3a425d;
+}
+
+.request-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.accept-btn, .decline-btn {
+  border: none;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.accept-btn {
+  background-color: var(--cf-brand);
+  color: #fff;
+}
+
+.accept-btn:hover {
+  background-color: #142b7e;
+  transform: translateY(-2px);
+}
+
+.decline-btn {
+  background-color: #f1f3f5;
+  color: #5a6482;
+}
+
+.decline-btn:hover {
+  background-color: #e9ecef;
+}
+
+.no-requests-message {
+  color: #5a6482;
+  font-size: 1.1rem;
+  padding: 40px;
+  text-align: center;
+  background-color: #f9f9fb;
+  border-radius: 12px;
+}
+
+/* --- NEW STYLES FOR REDESIGNED NOTIFICATION CARDS --- */
+.notification-card {
+  background: var(--cf-card-bg);
+  border-left: 5px solid #4CAF50; /* Green accent for success */
+  border-radius: 8px;
+  box-shadow: var(--cf-shadow);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.notification-icon {
+  font-size: 1.8rem;
+  color: #4CAF50;
+  flex-shrink: 0; /* Prevents icon from shrinking */
+}
+
+.notification-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-text {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #3a425d;
+}
+
+.notification-timestamp {
+  font-size: 0.8rem;
+  color: #888;
+}

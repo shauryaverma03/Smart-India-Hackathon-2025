@@ -1,0 +1,104 @@
+.mentor-card {
+  background: var(--cf-card-bg);
+  border-radius: 16px;
+  box-shadow: var(--cf-shadow);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  border: 1px solid #eef0f4;
+}
+
+.mentor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(80,100,140,0.12);
+}
+
+.mentor-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.mentor-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--cf-brand-light);
+}
+
+.mentor-info {
+  flex-grow: 1;
+}
+
+.mentor-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #232945;
+}
+
+.mentor-title {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #5a6482;
+}
+
+.mentor-score {
+  background: var(--cf-brand-light);
+  color: var(--cf-brand);
+  border-radius: 12px;
+  padding: 8px 12px;
+  text-align: center;
+}
+
+.mentor-score span {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.mentor-score p {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.ai-rationale-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cf-brand);
+  margin: 0 0 8px 0;
+}
+
+.ai-rationale-text {
+  font-size: 0.95rem;
+  color: #3a425d;
+  line-height: 1.5;
+  margin: 0;
+  border-left: 3px solid var(--cf-brand-light);
+  padding-left: 12px;
+}
+
+.mentor-card-footer {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.connect-btn {
+  background: var(--cf-brand);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.18s;
+}
+
+.connect-btn:hover {
+  background: #142b7e;
+  transform: scale(1.05);
+}
