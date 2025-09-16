@@ -1,30 +1,24 @@
-import React from 'react';
-import CareerRecommendationCard from './CareerRecommendationCard';
+// src/components/MessageList.jsx
 
-const TypingIndicator = () => (
-  <div className="message-bubble bot">
-    <div className="typing-indicator">
-      <span></span><span></span><span></span>
-    </div>
-  </div>
-);
+import React from 'react';
+import ChatMessage from './ChatMessage.jsx';
+import './MessageList.css'; 
 
 function MessageList({ messages, isLoading }) {
   return (
     <div className="message-list">
-      {messages.map((msg) => {
-        // If the message type is structured, render the special card
-        if (msg.type === 'structured') {
-          return <CareerRecommendationCard key={msg.id} data={msg.data} />;
-        }
-        // Otherwise, render a normal text bubble
-        return (
-          <div key={msg.id} className={`message-bubble ${msg.sender}`}>
-            {msg.text}
+      {messages.map((message) => (
+        <ChatMessage key={message.id} sender={message.sender} text={message.text} />
+      ))}
+      {isLoading && (
+        <div className="message-item bot">
+          <div className="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
-        );
-      })}
-      {isLoading && <TypingIndicator />}
+        </div>
+      )}
     </div>
   );
 }

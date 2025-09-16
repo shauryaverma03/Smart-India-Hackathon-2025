@@ -1,0 +1,65 @@
+/* src/components/MessageList.css */
+
+.message-list {
+  flex-grow: 1; /* Allows the list to fill the available space */
+  overflow-y: auto; /* Adds a scrollbar when content overflows */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Space between message bubbles */
+  background-color: var(--bg-light);
+}
+
+/* --- Custom Scrollbar Styling --- */
+.message-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.message-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.message-list::-webkit-scrollbar-thumb {
+  background-color: var(--brand-color);
+  border-radius: 10px;
+}
+
+/* --- Typing Indicator --- */
+/* The .message-item.bot class is defined in ChatMessage.css, 
+   this just ensures the container is ready for the indicator */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  padding: 12px 18px;
+}
+
+.typing-indicator span {
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  background-color: #aaa;
+  margin: 0 2px;
+  /* The pulsate animation is defined below */
+  animation: pulsate 1.2s infinite ease-in-out;
+}
+
+/* Adds the staggered "wave" effect */
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* --- Keyframe Animation for Typing Indicator --- */
+@keyframes pulsate {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+  }
+  40% {
+    opacity: 1;
+  }
+}

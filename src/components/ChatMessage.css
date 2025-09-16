@@ -1,0 +1,107 @@
+/* src/components/ChatMessage.css */
+
+/* --- General Message Item Layout --- */
+.message-item {
+  display: flex;
+  align-items: flex-end; /* Aligns avatar with bottom of bubble */
+  gap: 10px;
+  max-width: 85%;
+  animation: fade-in-slide-up 0.4s ease-out forwards;
+}
+
+/* --- User and Bot Alignment --- */
+.message-item.user {
+  align-self: flex-end;
+  flex-direction: row-reverse; /* Flips order for User: Bubble then Avatar */
+}
+
+.message-item.bot {
+  align-self: flex-start;
+  flex-direction: row; /* Default order for Bot: Avatar then Bubble */
+}
+
+/* --- Avatar Styling --- */
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  flex-shrink: 0; /* Prevents avatar from shrinking */
+}
+
+.avatar.user-avatar {
+  background: #e0e0e0;
+}
+
+.avatar.bot-avatar {
+  background: var(--brand-gradient);
+  color: var(--text-light);
+}
+
+/* --- Message Content Bubble Styling --- */
+.message-content {
+  padding: 12px 18px;
+  border-radius: var(--border-radius-bubble);
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+.message-item.user .message-content {
+  background: var(--brand-gradient);
+  color: var(--text-light);
+  border-bottom-right-radius: 5px;
+}
+
+.message-item.bot .message-content {
+  background-color: var(--bg-received);
+  color: var(--text-dark);
+  border-bottom-left-radius: 5px;
+}
+
+/* --- Styling for ReactMarkdown output --- */
+/* This makes the bot's formatted text look great */
+.message-content p {
+  margin-top: 0;
+  margin-bottom: 0.75em;
+}
+
+.message-content p:last-child {
+  margin-bottom: 0;
+}
+
+.message-content h1,
+.message-content h2,
+.message-content h3 {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  color: var(--brand-color);
+}
+
+.message-content ul,
+.message-content ol {
+  padding-left: 20px;
+  margin-bottom: 0.5em;
+}
+
+.message-content li {
+  margin-bottom: 0.3em;
+}
+
+.message-content strong {
+  color: var(--brand-color);
+}
+
+/* Keyframe animation (can be in the main CSS file too) */
+@keyframes fade-in-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
