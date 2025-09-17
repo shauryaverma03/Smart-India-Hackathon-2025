@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import PeoplePage from "./PeoplePage";
 import NotificationsPage from "./NotificationsPage";
 import MessagesPage from "./MessagesPage";
-import DreamFlowPage from "./DreamFlowPage"; // 1. Import the new DreamFlowPage
+import DreamFlowPage from "./DreamFlowPage";
+import ResumeAnalyserPage from "./ResumeAnalyserPage"; // <-- Import the new page
 import { collection, collectionGroup, query, where, onSnapshot } from "firebase/firestore"; 
 import { db } from "../firebase";
 import {
@@ -17,23 +18,23 @@ import {
   MdClose,
   MdNotifications,
   MdChat,
-  MdAutoAwesome, // 2. Import a new icon for the bot
+  MdAutoAwesome
 } from "react-icons/md";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
-// 3. Add "DreamFlow AI" to the sidebar menu array
 const SIDEBAR_MENU = [
   { name: "People", icon: <MdPeople /> },
   { name: "Style", icon: <MdStyle /> },
   { name: "Jobs", icon: <MdWork /> },
   { name: "Community", icon: <MdGroups /> },
-  { name: "DreamFlow AI", icon: <MdAutoAwesome /> }, // The new menu item
+  { name: "DreamFlow AI", icon: <MdAutoAwesome /> },
   { name: "Notifications", icon: <MdNotifications /> },
   { name: "Messages", icon: <MdChat /> },
   { name: "Events", icon: <MdEvent /> },
   { name: "Resume Builder", icon: <MdDescription /> },
+  { name: "Resume Analyser", icon: <MdDescription /> }, // <-- Added here
   { name: "Settings", icon: <MdSettings /> },
 ];
 
@@ -119,7 +120,6 @@ export default function Dashboard() {
     navigate("/login");
   }
 
-  // 4. Update the renderContent function to show the DreamFlowPage
   function renderContent() {
     if (!isLoggedIn) {
       return (
@@ -132,12 +132,12 @@ export default function Dashboard() {
         </div>
       );
     }
-    
     switch (activeIndex) {
       case 0: return <PeoplePage userName={userName || userEmail} currentUser={user} />;
-      case 4: return <DreamFlowPage currentUser={user} />; // When DreamFlow AI is selected
-      case 5: return <NotificationsPage currentUser={user} />; // Index shifted from 4 to 5
-      case 6: return <MessagesPage currentUser={user} />; // Index shifted from 5 to 6
+      case 4: return <DreamFlowPage currentUser={user} />;
+      case 5: return <NotificationsPage currentUser={user} />;
+      case 6: return <MessagesPage currentUser={user} />;
+      case 9: return <ResumeAnalyserPage currentUser={user} />; // Resume Analyser
       default:
         return (
           <div className="dashboard-center">
@@ -161,13 +161,12 @@ export default function Dashboard() {
         </div>
         <nav className="dashboard-menu">
           {SIDEBAR_MENU.map((item, idx) => (
-            // 5. Apply the special 'dreamflow-menu-btn' class conditionally
             <button 
               key={item.name} 
               className={`dashboard-menu-btn ${item.name === "DreamFlow AI" ? "dreamflow-menu-btn" : ""} ${activeIndex === idx ? " active" : ""}`} 
               onClick={() => handleSidebarSelect(idx)} 
               tabIndex={0} 
-              disabled={!isLoggedIn && item.name !== 'People'} // Example: disable if not logged in
+              disabled={!isLoggedIn && item.name !== 'People'}
             >
               <span className={`dashboard-menu-icon${activeIndex === idx ? " active" : ""}`}>
                 {item.icon}
@@ -193,8 +192,11 @@ export default function Dashboard() {
               <>
                 <span className="dashboard-welcome">Welcome, <strong>{userName || userEmail}</strong></span>
                 <span className="dashboard-avatar">
-                  {userAvatar ? (<img src={userAvatar} alt="User avatar" className="dashboard-avatar-img" onError={e => { e.target.onerror=null; e.target.src="/avatar-placeholder.png"; }} />) 
-                  : (<span className="dashboard-avatar-initial">{getInitial(userName, userEmail)}</span>)}
+                  {userAvatar ? (
+                    <img src={userAvatar} alt="User avatar" className="dashboard-avatar-img" onError={e => { e.target.onerror=null; e.target.src="/avatar-placeholder.png"; }} />
+                  ) : (
+                    <span className="dashboard-avatar-initial">{getInitial(userName, userEmail)}</span>
+                  )}
                 </span>
               </>
             )}
