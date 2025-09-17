@@ -44,7 +44,11 @@ export default function ResumeAnalyserPage() {
     formData.append("job_description", jobDescription);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/analyse_resume", {
+      // Use environment variable for backend URL, fallback to localhost for local dev
+      const backendUrl =
+        process.env.REACT_APP_BACKEND_URL ||
+        "http://127.0.0.1:5000";
+      const response = await fetch(`${backendUrl}/api/analyse_resume`, {
         method: "POST",
         body: formData,
       });
