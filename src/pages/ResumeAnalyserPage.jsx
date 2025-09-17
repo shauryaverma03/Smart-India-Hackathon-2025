@@ -1,22 +1,80 @@
 import React, { useState } from "react";
 
-// Helper: converts markdown and newlines to HTML
+// Enhanced: Converts a plain profile summary into nicely structured HTML with bullets and sections.
 function formatProfileSummary(text) {
-  // Bold (**text**)
-  let html = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-  // Numbered lists
-  html = html.replace(/(\d+)\. /g, '<br><span style="font-weight:bold;color:#1976d2;">$1.</span> ');
-  // Bullets (- or *)
-  html = html.replace(/[\n\r]- (.+)/g, '<li>$1</li>');
-  // New paragraphs for double line breaks
-  html = html.replace(/\n{2,}/g, '</p><p>');
-  // Single newlines to <br>
-  html = html.replace(/\n/g, "<br>");
-  // Wrap in <p> if not already
-  if (!html.startsWith("<p>")) html = `<p>${html}</p>`;
-  // Remove empty <li>s and fix list starts
-  html = html.replace(/<li><\/li>/g, "");
-  html = html.replace(/(<li>.+?<\/li>)/gs, "<ul>$1</ul>");
+  if (!text) return "";
+
+  // Split into sentences for easier formatting
+  const recs = [
+    {
+      heading: "Title & Focus",
+      match: /(AI \| Data Science \| Full Stack Web Developer.*?target\.)/i,
+    },
+    {
+      heading: "Profile Summary",
+      match: /(profile summary is.*?\.)/i,
+    },
+    {
+      heading: "Project Descriptions",
+      match: /(project descriptions.*?results\.)/i,
+    },
+    {
+      heading: "RouteSense AI Project",
+      match: /(RouteSense AI.*?accuracy\.)/i,
+    },
+    {
+      heading: "Sentiment Analysis Project",
+      match: /(Sentiment Analysis.*?accuracy\.)/i,
+    },
+    {
+      heading: "Other Projects",
+      match: /(Creative Developer Portfolio.*?limited\.)/i,
+    },
+    {
+      heading: "Core Skills",
+      match: /(Core Skills.*?together\.)/i,
+    },
+    {
+      heading: "Missing Keywords",
+      match: /(lacks crucial data science keywords.*?MissingKeywords.*?\.)/i,
+    },
+    {
+      heading: "Certifications",
+      match: /(Add specific certificates.*?DataCamp\.)/i,
+    },
+    {
+      heading: "Soft Skills",
+      match: /(Soft skills.*?descriptions\.)/i,
+    },
+    {
+      heading: "Action Verbs",
+      match: /(Use action verbs.*?Optimized.*?\.)/i,
+    },
+    {
+      heading: "Formatting",
+      match: /(Fix typos.*?visual appeal\.)/i,
+    },
+  ];
+
+  // Build HTML with sections and bullet points
+  let html = "<ul style='padding-left:20px;'>";
+  let remaining = text;
+
+  recs.forEach((rec) => {
+    const match = remaining.match(rec.match);
+    if (match) {
+      html += `<li><strong>${rec.heading}:</strong> ${match[1].replace(/^[A-Z]/, c => c.toUpperCase())}</li>`;
+      // Remove the matched part from the remaining text
+      remaining = remaining.replace(match[1], "");
+    }
+  });
+
+  // If there's any unstructured text left, show as an extra point
+  if (remaining.trim()) {
+    html += `<li>${remaining.trim()}</li>`;
+  }
+
+  html += "</ul>";
   return html;
 }
 
