@@ -4,7 +4,8 @@ import NotificationsPage from "./NotificationsPage";
 import MessagesPage from "./MessagesPage";
 import DreamFlowPage from "./DreamFlowPage";
 import ResumeAnalyserPage from "./ResumeAnalyserPage";
-import Settings from "./Settings"; // <-- Import Settings page
+import ResumeBuilder from "./ResumeBuilder"; // <-- import ResumeBuilder
+import Settings from "./Settings";
 import { collection, collectionGroup, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import {
@@ -45,10 +46,9 @@ function getInitial(name, email) {
   return "?";
 }
 
-// Helper to detect settings tab from query param
 function getTabFromQuery(location) {
   const params = new URLSearchParams(location.search);
-  if (params.get("tab") === "settings") return 10; // Settings index
+  if (params.get("tab") === "settings") return 10;
   return null;
 }
 
@@ -65,7 +65,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Keep activeIndex in sync with ?tab=settings
   useEffect(() => {
     const idx = getTabFromQuery(location);
     if (idx !== null) setActiveIndex(idx);
@@ -121,11 +120,9 @@ export default function Dashboard() {
     setActiveIndex(idx);
     setSidebarOpen(false);
 
-    // Special navigation for Settings tab (uses ?tab=settings)
     if (SIDEBAR_MENU[idx].name === "Settings") {
       navigate("/dashboard?tab=settings");
     } else {
-      // For all other tabs, remove query param if present
       if (location.search) {
         navigate("/dashboard");
       }
@@ -158,9 +155,11 @@ export default function Dashboard() {
       );
     }
 
-    // Show Settings tab if active
     if (activeIndex === 10) {
       return <Settings currentUser={user} />;
+    }
+    if (activeIndex === 8) {
+      return <ResumeBuilder />;
     }
 
     switch (activeIndex) {
