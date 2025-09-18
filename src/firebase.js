@@ -12,7 +12,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCQ0X7aXiiBxDLCXf_rp3CpNelypTpMAUo",
   authDomain: "carrerflow-a73c1.firebaseapp.com",
   projectId: "carrerflow-a73c1",
-  storageBucket: "carrerflow-a73c1.firebasestorage.app",
+  storageBucket: "carrerflow-a73c1.appspot.com", // <-- fixed typo here
   messagingSenderId: "391235321572",
   appId: "1:391235321572:web:5895cd68d3487c038bb6f1",
   measurementId: "G-98NVRH3QQB"

@@ -1,31 +1,27 @@
-// src/pages/LoginPage/LoginPage.jsx
-
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./LoginPage.css";
-import { auth } from "../firebase";
-// 1. IMPORT THE 'sendPasswordResetEmail' FUNCTION
+import { auth, db } from "../firebase";
 import { 
   GoogleAuthProvider, 
   signInWithPopup,
   signInWithEmailAndPassword,
-  sendPasswordResetEmail // New import
+  sendPasswordResetEmail
 } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import Notification from "../components/Notification";
 
 export default function LoginPage() {
   const [hover, setHover] = useState(false);
   const [show, setShow] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
-  // 2. ADD STATE TO MANAGE THE VIEW ('login' or 'forgotPassword')
   const [view, setView] = useState('login');
-
-  // State for notifications and form inputs
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     setTimeout(() => setShow(true), 20);
@@ -38,12 +34,56 @@ export default function LoginPage() {
     setTimeout(() => setShowNotification(false), duration);
   };
 
+  // Helper: Redirect based on quizCompleted status
+  const redirectAfterAuth = async (user) => {
+    if (!user) {
+      showNotificationWithMessage("User authentication failed.");
+      return;
+    }
+    try {
+      const docRef = doc(db, "users", user.uid);
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) {
+        // If user doc doesn't exist (rare), create it
+        await setDoc(docRef, {
+          email: user.email,
+          displayName: user.displayName || "",
+          quizCompleted: false,
+        });
+        navigate("/quiz");
+        return;
+      }
+      if (!snap.data().quizCompleted) {
+        navigate("/quiz");
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      console.error("Error checking quiz status", err);
+      navigate("/quiz"); // default to quiz on error
+    }
+  };
+
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
+      // Ensure Firestore user doc is created if doesn't exist
+      const userDocRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userDocRef);
+      if (!snap.exists()) {
+        await setDoc(userDocRef, {
+          email: user.email,
+          displayName: user.displayName || "",
+          quizCompleted: false,
+        });
+        navigate("/quiz");
+        showNotificationWithMessage("✅ Successfully signed in with Google!");
+        return;
+      }
+      await redirectAfterAuth(user);
       showNotificationWithMessage("✅ Successfully signed in with Google!");
-      setTimeout(() => { window.location.href = '/dashboard'; }, 1500);
     } catch (error) {
       console.error("Error during Google sign-in: ", error);
       showNotificationWithMessage("❌ Google Sign-In failed. Please try again.");
@@ -56,9 +96,23 @@ export default function LoginPage() {
       return;
     }
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // Same logic as Google login: ensure user doc exists
+      const user = userCredential.user;
+      const userDocRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userDocRef);
+      if (!snap.exists()) {
+        await setDoc(userDocRef, {
+          email: user.email,
+          displayName: user.displayName || "",
+          quizCompleted: false,
+        });
+        navigate("/quiz");
+        showNotificationWithMessage("✅ Welcome! Please take the quiz.");
+        return;
+      }
+      await redirectAfterAuth(user);
       showNotificationWithMessage("✅ Welcome back!");
-      setTimeout(() => { window.location.href = '/dashboard'; }, 1500);
     } catch (error) {
       console.error("Error signing in:", error);
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -69,7 +123,6 @@ export default function LoginPage() {
     }
   };
 
-  // 3. CREATE THE FUNCTION TO HANDLE PASSWORD RESET
   const handlePasswordReset = async () => {
     if (!email) {
       showNotificationWithMessage("❌ Please enter your email address.");
@@ -78,7 +131,7 @@ export default function LoginPage() {
     try {
       await sendPasswordResetEmail(auth, email);
       showNotificationWithMessage("✅ Password reset link sent! Check your inbox.");
-      setView('login'); // Switch back to the login view
+      setView('login');
     } catch (error) {
       console.error("Error sending password reset email:", error);
       if (error.code === 'auth/user-not-found') {
@@ -117,9 +170,7 @@ export default function LoginPage() {
             <img src="/logo.png" alt="Logo" className="auth-login-logo" style={{ height: 38, marginBottom: 18 }}/>
           </Link>
 
-          {/* 4. USE CONDITIONAL RENDERING TO SWITCH FORMS */}
           {view === 'login' ? (
-            // =================== LOGIN VIEW ===================
             <>
               <h2 className="auth-login-title">Log in to your account</h2>
               <button className="auth-login-oauth-btn" onClick={handleGoogleSignIn}>
@@ -157,7 +208,6 @@ export default function LoginPage() {
               </p>
             </>
           ) : (
-            // =================== FORGOT PASSWORD VIEW ===================
             <>
               <h2 className="auth-login-title">Reset Your Password</h2>
               <p style={{color: '#666', fontSize: '0.95rem', marginBottom: '20px'}}>

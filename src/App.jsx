@@ -1,16 +1,58 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import AuthPage from "./pages/AuthPage";
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
-import ChatPage from "./pages/ChatPage"; // 1. Import the new ChatPage component
-import { Routes, Route } from "react-router-dom";
+import ChatPage from "./pages/ChatPage";
+import QuizPage from "./pages/QuizPage";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { auth, db } from "./firebase";
+import { doc, getDoc } from "firebase/firestore";
 import "./HomePage.css";
 
+// Route guard for dashboard and chat (add more as needed)
+function RequireQuizCompleted({ children }) {
+  const [loading, setLoading] = useState(true);
+  const [allow, setAllow] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkQuiz = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        // Not logged in, redirect to login
+        navigate("/login");
+        return;
+      }
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists() || !userDoc.data().quizCompleted) {
+          navigate("/quiz");
+        } else {
+          setAllow(true);
+        }
+      } catch (err) {
+        navigate("/quiz");
+      }
+      setLoading(false);
+    };
+    checkQuiz();
+    // Only check on mount, not on rerenders
+    // eslint-disable-next-line
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  return allow ? children : null;
+}
+
 export default function App() {
-  // 2. Remove the old hardcoded user object, as Dashboard now gets it from Firebase
-  // const user = { name: "Shaurya" }; 
+  const location = useLocation();
+  // Hide Navbar/Footer on fullscreen pages
+  const fullscreenRoutes = ["/login", "/signup", "/dashboard", "/quiz"];
+  const isFullscreen = fullscreenRoutes.some((r) =>
+    location.pathname.startsWith(r)
+  );
 
   return (
     <Routes>
@@ -42,13 +84,26 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       {/* Signup page: FULLSCREEN, NO Navbar/Footer */}
       <Route path="/signup" element={<AuthPage type="signup" />} />
-      
-      {/* Dashboard page: FULLSCREEN, NO Navbar/Footer */}
-      {/* 4. Remove the unused 'user' prop from the Dashboard */}
-      <Route path="/dashboard" element={<Dashboard />} />
-
-      {/* 3. Add the new route for the ChatPage */}
-      <Route path="/chat/:chatId" element={<ChatPage />} />
+      {/* Dashboard page: Require quiz completed */}
+      <Route
+        path="/dashboard"
+        element={
+          <RequireQuizCompleted>
+            <Dashboard />
+          </RequireQuizCompleted>
+        }
+      />
+      {/* ChatPage: Require quiz completed */}
+      <Route
+        path="/chat/:chatId"
+        element={
+          <RequireQuizCompleted>
+            <ChatPage />
+          </RequireQuizCompleted>
+        }
+      />
+      {/* QuizPage: FULLSCREEN, NO Navbar/Footer */}
+      <Route path="/quiz" element={<QuizPage />} />
     </Routes>
   );
 }
