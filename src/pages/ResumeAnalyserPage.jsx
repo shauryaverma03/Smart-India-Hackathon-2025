@@ -1,8 +1,9 @@
 import React, { useState } from "react";
+import "./ResumeAnalyserPage.css"; // Import the stylesheet
 
 /**
  * Parses a text summary that uses markdown-style double asterisks for headings
- * (e.g., "**Strengths:** text...") and converts it into a formatted HTML list.
+ * and converts it into a formatted HTML list.
  * @param {string} text - The raw text summary from the backend.
  * @returns {string} An HTML string representing an unordered list.
  */
@@ -12,7 +13,7 @@ function formatProfileSummary(text) {
   const sectionRegex = /(\*\*.*?\*\*)/g;
   const parts = text.split(sectionRegex).filter(part => part);
 
-  let html = "<ul style='padding-left:20px; margin: 0;'>";
+  let html = "<ul class='summary-list'>";
   
   if (parts.length > 0 && !parts[0].startsWith('**')) {
     html += `<li>${parts.shift().trim()}</li>`;
@@ -24,18 +25,18 @@ function formatProfileSummary(text) {
     
     if (heading && content && content.trim()) {
       const cleanedContent = content.trim().replace(/^[:\s*]+/, '');
-      html += `<li style="margin-bottom: 10px;"><strong>${heading}</strong> ${cleanedContent}</li>`;
+      html += `<li class='summary-list-item'><strong>${heading}</strong> ${cleanedContent}</li>`;
     }
   }
 
-  if (html === "<ul style='padding-left:20px; margin: 0;'>") {
+  // Fallback for plain text
+  if (html === "<ul class='summary-list'>") {
     html += `<li>${text}</li>`;
   }
   
   html += "</ul>";
   return html;
 }
-
 
 export default function ResumeAnalyserPage() {
   // --- STATE MANAGEMENT ---
@@ -96,24 +97,6 @@ export default function ResumeAnalyserPage() {
    * @param {object | string} resultData - The result from the backend.
    */
   function renderResult(resultData) {
-    // --- STYLES OBJECTS for cleaner JSX ---
-    const cardStyle = {
-      border: '1px solid #e0e0e0',
-      borderRadius: '8px',
-      padding: '20px',
-      marginBottom: '16px',
-      backgroundColor: '#ffffff',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-      textAlign: 'left'
-    };
-
-    const cardTitleStyle = {
-      margin: '0 0 12px 0',
-      fontSize: '18px',
-      color: '#333',
-    };
-    
-    // Check if the result is a structured object with the expected keys.
     if (
       typeof resultData === "object" &&
       resultData !== null &&
@@ -121,46 +104,44 @@ export default function ResumeAnalyserPage() {
       "MissingKeywords" in resultData &&
       "Profile Summary" in resultData
     ) {
-      const matchPercentage = parseInt(resultData["JD Match"], 10);
+      const matchPercentage = parseInt(resultData["JD Match"], 10) || 0;
       return (
-        <div style={{ marginTop: 24 }}>
-          
+        <div className="result-container">
           {/* Card 1: JD Match Score */}
-          <div style={cardStyle}>
-            <h3 style={cardTitleStyle}>✅ Job Description Match</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#1976d2' }}>
-                {matchPercentage}%
-              </span>
-              <div style={{ flex: 1, backgroundColor: '#e0e0e0', borderRadius: '8px', height: '16px' }}>
-                <div style={{ width: `${matchPercentage}%`, backgroundColor: '#1976d2', height: '100%', borderRadius: '8px', transition: 'width 0.5s ease-in-out' }} />
+          <div className="result-card">
+            <h3 className="result-card-title">✅ Job Description Match</h3>
+            <div className="jd-match-content">
+              <span className="jd-match-score">{matchPercentage}%</span>
+              <div className="progress-bar-container">
+                <div 
+                  className="progress-bar" 
+                  style={{ width: `${matchPercentage}%` }} 
+                />
               </div>
             </div>
           </div>
           
           {/* Card 2: Missing Keywords */}
-          <div style={cardStyle}>
-            <h3 style={cardTitleStyle}>🔑 Missing Keywords</h3>
-            <p style={{ marginTop: 0, marginBottom: '16px', color: '#666', fontSize: '14px' }}>
+          <div className="result-card">
+            <h3 className="result-card-title">🔑 Missing Keywords</h3>
+            <p className="keywords-description">
               Consider adding these terms to your resume to improve your ATS score.
             </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            <div className="keywords-container">
               {Array.isArray(resultData["MissingKeywords"]) && resultData["MissingKeywords"].length > 0
                 ? resultData["MissingKeywords"].map((kw, idx) => (
-                    <span key={idx} style={{ background: "#ffebee", color: "#c62828", borderRadius: "12px", padding: "5px 12px", fontSize: 14, fontWeight: 500 }}>
-                      {kw}
-                    </span>
+                    <span key={idx} className="keyword-tag">{kw}</span>
                   ))
-                : <span style={{ color: "#777" }}>Excellent! No critical keywords are missing.</span>
+                : <span className="no-keywords-message">Excellent! No critical keywords are missing.</span>
               }
             </div>
           </div>
           
           {/* Card 3: Profile Summary & Recommendations */}
-          <div style={cardStyle}>
-            <h3 style={cardTitleStyle}>📝 AI-Powered Recommendations</h3>
+          <div className="result-card">
+            <h3 className="result-card-title">📝 AI-Powered Recommendations</h3>
             <div
-              style={{ whiteSpace: "normal", background: "#f8f9fa", padding: 16, borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 15, lineHeight: 1.7, color: "#262626" }}
+              className="summary-content"
               dangerouslySetInnerHTML={{ __html: formatProfileSummary(resultData["Profile Summary"]) }}
             />
           </div>
@@ -170,9 +151,9 @@ export default function ResumeAnalyserPage() {
     
     // Fallback for unexpected or plain text results.
     return (
-      <div style={{ marginTop: 24, ...cardStyle }}>
-        <h3 style={cardTitleStyle}>Raw Server Response</h3>
-        <pre style={{ background: "#f3f3f3", padding: 12, borderRadius: 6, whiteSpace: "pre-wrap", textAlign: 'left', margin: 0 }}>
+      <div className="result-card raw-response-card">
+        <h3 className="result-card-title">Raw Server Response</h3>
+        <pre className="raw-response-pre">
           {typeof resultData === "string" ? resultData : JSON.stringify(resultData, null, 2)}
         </pre>
       </div>
@@ -181,29 +162,30 @@ export default function ResumeAnalyserPage() {
 
   // --- COMPONENT RENDER ---
   return (
-    <div className="dashboard-center">
-      <div className="dashboard-card fade-in" style={{ maxWidth: 700, width: "100%" }}>
-        <h2 style={{ marginBottom: 10 }}>Resume Analyser</h2>
-        <p style={{ marginBottom: 24, color: '#555' }}>
+    <div className="analyser-container">
+      <div className="analyser-card fade-in">
+        <h2 className="analyser-title">Resume Analyser</h2>
+        <p className="analyser-subtitle">
           Get instant, AI-driven feedback on how well your resume matches a job description.
         </p>
 
         <form onSubmit={handleAnalyse}>
-          <div style={{ marginBottom: 16 }}>
-            <label htmlFor="resume" style={{ fontWeight: 500, display: "block", marginBottom: 8 }}>
+          <div className="form-group">
+            <label htmlFor="resume" className="form-label">
               1. Upload Your Resume (PDF):
             </label>
             <input
               type="file"
               id="resume"
+              className="file-input"
               accept="application/pdf"
               onChange={e => setResumeFile(e.target.files[0])}
               required
             />
           </div>
           
-          <div style={{ margin: "24px 0" }}>
-            <label htmlFor="jd" style={{ fontWeight: 500, display: "block", marginBottom: 8 }}>
+          <div className="form-group">
+            <label htmlFor="jd" className="form-label">
               2. Paste Job Description:
             </label>
             <textarea
@@ -212,31 +194,21 @@ export default function ResumeAnalyserPage() {
               value={jobDescription}
               onChange={e => setJobDescription(e.target.value)}
               placeholder="Paste the full job description here..."
-              style={{ width: "100%", fontFamily: "inherit", padding: 10, borderRadius: 6, border: "1px solid #ccc", boxSizing: 'border-box' }}
+              className="jd-textarea"
               required
             />
           </div>
           
-          <button
-            type="submit"
-            disabled={loading}
-            style={{ width: '100%', background: "#1976d2", color: "white", padding: "12px 24px", border: "none", borderRadius: "6px", fontWeight: "bold", fontSize: "16px", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s' }}
-          >
+          <button type="submit" className="submit-btn" disabled={loading}>
             {loading ? "Analysing..." : "✨ Analyse My Resume"}
           </button>
         </form>
 
         {error && (
-          <div style={{ color: "#d32f2f", backgroundColor: '#ffcdd2', marginTop: 20, padding: '10px 15px', borderRadius: '6px' }}>
-            {error}
-          </div>
+          <div className="error-message">{error}</div>
         )}
         
-        {result && (
-          <div>
-            {renderResult(result)}
-          </div>
-        )}
+        {result && renderResult(result)}
       </div>
     </div>
   );
