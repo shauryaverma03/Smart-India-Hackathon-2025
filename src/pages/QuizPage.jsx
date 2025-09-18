@@ -4,122 +4,169 @@ import { getAuth } from "firebase/auth";
 import { doc, updateDoc, getFirestore } from "firebase/firestore";
 import "./QuizPage.css";
 
+// Quiz questions data structure
 const quizQuestions = [
   {
-    question: "Which subjects do you enjoy studying the most in school?",
+    question: "What is your current educational status?",
+    type: "single",
+    options: [
+      "Completed Class 10",
+      "Completing Class 10 this year",
+      "Completed Class 12",
+      "Completing Class 12 this year",
+      "Pursuing graduation",
+      "Other",
+    ],
+  },
+  {
+    question: "Which subjects do you enjoy or perform well in? (Select up to 3)",
+    type: "multi",
+    max: 3,
     options: [
       "Mathematics",
-      "Science (Physics/Biology/Chemistry)",
-      "Social Studies/History/Geography",
-      "Languages/Literature",
-      "Business/Accounts",
-      "Computer Science",
-      "Art/Music/Sports",
+      "Physics",
+      "Chemistry",
+      "Biology",
+      "Computer Science / IT",
+      "History / Civics",
+      "Geography",
+      "Economics / Business Studies / Accountancy",
+      "Languages & Literature",
+      "Fine / Performing Arts",
+      "Physical Education / Sports",
+      "Other",
+    ],
+    helper: "Choose up to 3 options",
+  },
+  {
+    question: "Which degree do you plan to pursue after Class 12?",
+    type: "single",
+    options: [
+      "Engineering (BTech/BE)",
+      "Medical (MBBS/BDS/Paramedical)",
+      "Science (BSc/BCA etc.)",
+      "Commerce (BCom/CA/CS/CFA etc.)",
+      "Management (BBA/BMS etc.)",
+      "Law (LLB/Integrated Law)",
+      "Design/Fine Arts",
+      "Humanities (BA/BSW etc.)",
+      "Skilled Trades / Vocational",
+      "Not sure yet",
+      "Other",
+    ],
+    helper: "Select the closest option. Choose “Other” if not listed.",
+  },
+  {
+    question: "Which career fields interest you the most? (Select all that apply)",
+    type: "multi",
+    max: 99,
+    options: [
+      "Engineering & Technology",
+      "Medical & Healthcare",
+      "Science & Research",
+      "Business & Management",
+      "Commerce, Banking & Finance",
+      "Civil Services & Government",
+      "Law & Legal Services",
+      "Education & Teaching",
+      "Creative Arts, Media & Design",
+      "Social Work & Community",
+      "Defense & Armed Forces",
+      "Skilled Trades & Vocational",
+      "Not sure yet",
+      "Other",
     ],
   },
   {
-    question: "Which activity excites you the most?",
+    question: "What entrance exams are you planning to prepare for? (Select all that apply)",
+    type: "multi",
+    max: 99,
     options: [
-      "Conducting experiments",
-      "Solving puzzles/math problems",
-      "Writing stories/poems",
-      "Organizing events",
-      "Helping others with their problems",
-      "Creating art/music",
-      "Starting a small business or shop",
+      "JEE Main/Advanced",
+      "NEET",
+      "CUET",
+      "State engineering entrance",
+      "State medical entrance",
+      "CLAT (Law)",
+      "Design (NIFT/NID/UCEED)",
+      "Management (CAT/XAT/MAT)",
+      "UPSC / State PSC",
+      "Banking / SSC / Railways",
+      "None at present",
+      "Other",
     ],
   },
   {
-    question: "How do you feel about numbers and calculations?",
+    question: "What factors matter most when choosing a college/course? (Select top 2)",
+    type: "multi",
+    max: 2,
     options: [
-      "I enjoy them and find them easy.",
-      "I’m okay with them, but not my favorite.",
-      "I find them difficult or boring.",
+      "Job placements",
+      "College reputation / ranking",
+      "Affordable fees / scholarships",
+      "Location near home",
+      "Curriculum & specializations",
+      "Faculty quality",
+      "Facilities / labs / hostels",
+      "Internships & practical exposure",
+      "Other",
+    ],
+    helper: "Pick up to 2 options",
+  },
+  {
+    question: "What is your family's monthly income range?",
+    type: "single",
+    options: [
+      "Below ₹25,000",
+      "₹25,000 - ₹50,000",
+      "₹50,000 - ₹1,00,000",
+      "Above ₹1,00,000",
+      "Prefer not to say",
     ],
   },
   {
-    question: "Are you comfortable using computers or learning new technology?",
+    question: "What are your strongest skills? (Select up to 3)",
+    type: "multi",
+    max: 3,
     options: [
-      "Yes, very comfortable",
-      "Somewhat comfortable",
-      "Not comfortable",
+      "Problem-solving & analytical thinking",
+      "Communication (verbal/written)",
+      "Leadership & teamwork",
+      "Creativity & innovation",
+      "Technical / computer skills",
+      "Research & analysis",
+      "Practical / mechanical abilities",
+      "People skills & empathy",
+      "Other",
+    ],
+    helper: "Choose up to 3 options",
+  },
+  {
+    question: "What constraints or challenges might affect your education? (Select all that apply)",
+    type: "multi",
+    max: 99,
+    options: [
+      "Financial limitations",
+      "Limited colleges nearby",
+      "Family responsibilities",
+      "Health issues",
+      "Language barriers",
+      "No significant constraints",
+      "Other",
     ],
   },
   {
-    question: "Do you enjoy working with your hands (craft, repair, cooking, etc.)?",
-    options: [
-      "Yes, very much",
-      "Sometimes",
-      "Not really",
-    ],
-  },
-  {
-    question: "Do you prefer working alone or in a team?",
-    options: [
-      "Alone",
-      "In a team",
-      "Both, depending on the task",
-    ],
-  },
-  {
-    question: "Do you like creative tasks such as drawing, acting, or music?",
-    options: [
-      "Yes, very much",
-      "Sometimes",
-      "Not at all",
-    ],
-  },
-  {
-    question: "What is your dream job or career?",
-    options: [
-      "Doctor/Engineer/Scientist/Researcher",
-      "Teacher/Professor/Writer/Journalist",
-      "Artist/Performer/Designer",
-      "Businessperson/Accountant/Banker",
-      "Government job (civil services, police, etc.)",
-      "Social worker/Counselor",
-    ],
-  },
-  {
-    question: "What is more important to you in a future job?",
-    options: [
-      "Good salary",
-      "Job stability (permanent job)",
-      "Flexibility/Creativity",
-      "Helping others",
-      "Opportunity to start my own business",
-    ],
-  },
-  {
-    question: "Are you interested in pursuing higher studies after your degree?",
-    options: [
-      "Yes, definitely",
-      "Maybe",
-      "No, I want to start working",
-    ],
-  },
-  {
-    question: "How important is it for you to study in your hometown/district?",
-    options: [
-      "Very important",
-      "Somewhat important",
-      "Not important, willing to move",
-    ],
-  },
-  {
-    question: "If you had to choose, which project would you like to do the most?",
-    options: [
-      "Build a model of a bridge (Science/Engineering)",
-      "Write and direct a play (Arts)",
-      "Plan a budget for a small event (Commerce)",
-      "Repair a bicycle or cook a new recipe (Vocational)",
-    ],
+    question: "What are your long-term career goals? (Optional)",
+    type: "text",
+    placeholder: "Your answer (optional)",
   },
 ];
 
 export default function QuizPage() {
   const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState(Array(quizQuestions.length).fill(""));
+  const [answers, setAnswers] = useState(
+    quizQuestions.map((q) => (q.type === "multi" ? [] : ""))
+  );
   const [submitted, setSubmitted] = useState(false);
   const [slide, setSlide] = useState("in");
   const [showCheck, setShowCheck] = useState(false);
@@ -127,14 +174,33 @@ export default function QuizPage() {
   const timeoutRef = useRef(null);
   const navigate = useNavigate();
 
-  // Handle dropdown select
-  const handleOptionSelect = (event) => {
+  const handleSingleSelect = (event) => {
     const newAnswers = [...answers];
     newAnswers[current] = event.target.value;
     setAnswers(newAnswers);
   };
 
-  // Animate to next/prev question
+  const handleMultiSelect = (option) => {
+    const max = quizQuestions[current].max || 99;
+    const prev = answers[current] || [];
+    let nextArr;
+    if (prev.includes(option)) {
+      nextArr = prev.filter((v) => v !== option);
+    } else {
+      if (prev.length >= max) return;
+      nextArr = [...prev, option];
+    }
+    const newAnswers = [...answers];
+    newAnswers[current] = nextArr;
+    setAnswers(newAnswers);
+  };
+
+  const handleTextChange = (event) => {
+    const newAnswers = [...answers];
+    newAnswers[current] = event.target.value;
+    setAnswers(newAnswers);
+  };
+
   const animateSlide = (direction, cb) => {
     setSlide(direction === "next" ? "out-left" : "out-right");
     timeoutRef.current = setTimeout(() => {
@@ -156,7 +222,14 @@ export default function QuizPage() {
     }
   };
 
-  // Submit quiz, set quizCompleted in Firestore, then redirect
+  const isAnswered = () => {
+    const ans = answers[current];
+    const q = quizQuestions[current];
+    if (q.type === "single") return !!ans;
+    if (q.type === "multi") return (ans && ans.length > 0);
+    return true; // Text is optional
+  };
+
   const handleSubmit = async () => {
     setShowCheck(true);
     setSubmitError("");
@@ -170,23 +243,23 @@ export default function QuizPage() {
           setSubmitError("You must be logged in to submit the quiz.");
           return;
         }
-        await updateDoc(doc(db, "users", user.uid), { quizCompleted: true });
+        await updateDoc(doc(db, "users", user.uid), { 
+          quizCompleted: true,
+          quizAnswers: answers
+        });
         setSubmitted(true);
 
         setTimeout(() => {
           navigate("/dashboard");
-        }, 1200); // 1.2s after completion, redirect to dashboard
+        }, 1200);
       } catch (err) {
         setShowCheck(false);
-        setSubmitError(
-          "Could not update quiz completion. Please try again or check your connection."
-        );
+        setSubmitError("Could not update quiz completion. Please try again or check your connection.");
         console.error("Could not update quizCompleted in Firestore", err);
       }
-    }, 1400); // show checkmark animation for 1.4s
+    }, 1400);
   };
 
-  // Clear timeouts on unmount
   React.useEffect(() => () => clearTimeout(timeoutRef.current), []);
 
   const progress = Math.round(((current + 1) / quizQuestions.length) * 100);
@@ -212,17 +285,10 @@ export default function QuizPage() {
     );
   }
 
+  const q = quizQuestions[current];
+
   return (
     <div className="quiz-bg">
-      {/* floating quiz icon */}
-      <div className="quiz-floaticon">
-        <svg width="54" height="54" fill="none" viewBox="0 0 54 54">
-          <circle cx="27" cy="27" r="27" fill="#fff" opacity="0.16"/>
-          <circle cx="27" cy="27" r="19" fill="#fbc2eb" opacity="0.55"/>
-          <circle cx="27" cy="27" r="13" fill="#a18cd1" opacity="0.9"/>
-          <text x="50%" y="56%" textAnchor="middle" fill="#fff" fontSize="22px" fontWeight="bold" dy=".3em">?</text>
-        </svg>
-      </div>
       <div className="quiz-container">
         <div className="quiz-card">
           <div className="quiz-header">
@@ -234,26 +300,75 @@ export default function QuizPage() {
               </span>
             </span>
           </div>
-          {/* Show error if any */}
           {submitError && (
             <div style={{ color: "red", marginBottom: 12 }}>{submitError}</div>
           )}
           <div className={`quiz-question-outer slide-${slide}`}>
-            <div key={current} className="quiz-question-inner">
-              <div className="quiz-question">{quizQuestions[current].question}</div>
-              <div className="quiz-dropdown-wrap">
-                <select
-                  className="quiz-dropdown"
-                  value={answers[current]}
-                  onChange={handleOptionSelect}
-                >
-                  <option value="" disabled>Select an option</option>
-                  {quizQuestions[current].options.map((option, idx) => (
-                    <option key={idx} value={option}>{option}</option>
+            <div className="quiz-question-inner">
+              <div className="quiz-question">{q.question}</div>
+
+              {/* Helper text for multi select */}
+              {q.type === "multi" && q.helper && (
+                <div className="quiz-multi-helper">{q.helper}</div>
+              )}
+
+              {/* SINGLE SELECT */}
+              {q.type === "single" && (
+                <div className="quiz-dropdown-wrap">
+                  <select
+                    className="quiz-dropdown"
+                    value={answers[current]}
+                    onChange={handleSingleSelect}
+                  >
+                    <option value="" disabled>Select an option</option>
+                    {q.options.map((option, idx) => (
+                      <option key={idx} value={option}>{option}</option>
+                    ))}
+                  </select>
+                  <span className="quiz-dropdown-arrow">&#9662;</span>
+                </div>
+              )}
+
+              {/* MULTI SELECT */}
+              {q.type === "multi" && (
+                <div className="quiz-checkbox-group">
+                  {q.options.map((option, idx) => (
+                    <label key={idx} className="quiz-checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={(answers[current] || []).includes(option)}
+                        onChange={() => handleMultiSelect(option)}
+                        disabled={
+                          !((answers[current] || []).includes(option)) &&
+                          (answers[current] || []).length >= q.max
+                        }
+                      />
+                      {option}
+                    </label>
                   ))}
-                </select>
-                <span className="quiz-dropdown-arrow">&#9662;</span>
-              </div>
+                </div>
+              )}
+
+              {/* TEXT (optional) */}
+              {q.type === "text" && (
+                <textarea
+                  className="quiz-textarea"
+                  value={answers[current]}
+                  onChange={handleTextChange}
+                  placeholder={q.placeholder || "Your answer"}
+                  rows={3}
+                  style={{
+                    width: "100%",
+                    borderRadius: 8,
+                    border: "1.5px solid #dbeafe",
+                    fontSize: "1rem",
+                    padding: "10px 12px",
+                    marginBottom: 14,
+                    marginTop: 2,
+                    background: "#f8fafc",
+                  }}
+                />
+              )}
             </div>
           </div>
           <div className="quiz-controls">
@@ -268,7 +383,7 @@ export default function QuizPage() {
               <button
                 className="quiz-btn"
                 onClick={handleNext}
-                disabled={answers[current] === ""}
+                disabled={!isAnswered()}
               >
                 Next
               </button>
@@ -276,7 +391,7 @@ export default function QuizPage() {
               <button
                 className="quiz-btn quiz-btn-green"
                 onClick={handleSubmit}
-                disabled={answers[current] === ""}
+                disabled={!isAnswered()}
               >
                 {showCheck ? (
                   <span className="quiz-btn-loader"></span>
