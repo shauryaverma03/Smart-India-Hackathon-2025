@@ -9,13 +9,13 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBiH_4zMWuMwR-SR9b36rpklpcYn23qOmI",
-  authDomain: "careerflowai-aaa71.firebaseapp.com",
-  projectId: "careerflowai-aaa71",
-  storageBucket: "careerflowai-aaa71.appspot.com",
-  messagingSenderId: "607069896142",
-  appId: "1:607069896142:web:7d37c8419e63c441beff9f",
-  measurementId: "G-S630ZM28HN"
+  apiKey: "AIzaSyCQ0X7aXiiBxDLCXf_rp3CpNelypTpMAUo",
+  authDomain: "carrerflow-a73c1.firebaseapp.com",
+  projectId: "carrerflow-a73c1",
+  storageBucket: "carrerflow-a73c1.appspot.com", // <-- fixed typo here
+  messagingSenderId: "391235321572",
+  appId: "1:391235321572:web:5895cd68d3487c038bb6f1",
+  measurementId: "G-98NVRH3QQB"
 };
 
 // Initialize Firebase

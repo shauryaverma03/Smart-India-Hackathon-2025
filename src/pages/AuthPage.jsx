@@ -1,17 +1,19 @@
-// src/pages/AuthPage/AuthPage.jsx
-
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import "./AuthPage.css";
-import { auth } from "../firebase";
-// 1. IMPORT ALL NECESSARY AUTH FUNCTIONS
-import { 
-  GoogleAuthProvider, 
-  signInWithPopup, 
+import { Link, useNavigate } from "react-router-dom";
+import "../pages/AuthPage.css";
+import { auth, db } from "../firebase"; // db = getFirestore() from firebase.js
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword, // Added for sign-in
-  updateProfile // Added to save user's name
+  signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
+import {
+  doc,
+  setDoc,
+  getDoc,
+} from "firebase/firestore";
 import Notification from "../components/Notification";
 
 // Card data for animation
@@ -44,38 +46,70 @@ export default function AuthPage({ type }) {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const timer = setInterval(() => {
       setActive((prev) => (prev + 1) % cards.length);
     }, 3000);
     return () => clearInterval(timer);
   }, []);
-  
-  // A reusable function to show notifications
+
+  // Notification helper
   const showNotificationWithMessage = (message, duration = 4000) => {
     setNotificationMessage(message);
     setShowNotification(true);
     setTimeout(() => setShowNotification(false), duration);
   };
 
-  // ==========================================================
-  // HANDLERS FOR AUTHENTICATION
-  // ==========================================================
+  // Helper: Redirect based on quiz status
+  const redirectAfterAuth = async (user) => {
+    if (!user) {
+      showNotificationWithMessage("User authentication failed.");
+      return;
+    }
+    try {
+      const docRef = doc(db, "users", user.uid);
+      const snap = await getDoc(docRef);
+      if (!snap.exists() || !snap.data().quizCompleted) {
+        navigate("/quiz");
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      console.error("Error checking quiz status", err);
+      navigate("/quiz"); // default to quiz on error
+    }
+  };
 
-  // UPDATED: Complete Google Sign-In Logic
+  // Google Sign-In
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-      showNotificationWithMessage("✅ Successfully signed in with Google!");
-      setTimeout(() => { window.location.href = '/dashboard'; }, 1500);
+      const userCredential = await signInWithPopup(auth, provider);
+      // Create user doc if not exists
+      const user = userCredential.user;
+      const docRef = doc(db, "users", user.uid);
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) {
+        await setDoc(docRef, {
+          email: user.email,
+          displayName: user.displayName || "",
+          quizCompleted: false,
+        });
+        navigate("/quiz");
+        showNotificationWithMessage("✅ Signed in with Google!");
+        return;
+      }
+      await redirectAfterAuth(user);
+      showNotificationWithMessage("✅ Signed in with Google!");
     } catch (error) {
       console.error("Error during Google sign-in:", error);
       showNotificationWithMessage("❌ Google Sign-In failed. Please try again.");
     }
   };
 
-  // UPDATED: Email Sign-Up Logic (with updateProfile)
+  // Email Sign-Up
   const handleEmailSignUp = async () => {
     if (!fullName || !email || !password) {
       showNotificationWithMessage("❌ Please fill in all fields.");
@@ -87,12 +121,15 @@ export default function AuthPage({ type }) {
     }
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // Save the user's full name to their profile
       await updateProfile(userCredential.user, { displayName: fullName });
-      
-      console.log("Account created successfully!", userCredential.user);
+      // Create user doc with quizCompleted: false
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        email,
+        displayName: fullName,
+        quizCompleted: false,
+      });
       showNotificationWithMessage("🎉 Account created successfully! Welcome!");
-      setTimeout(() => { window.location.href = '/dashboard'; }, 1500);
+      setTimeout(() => { navigate("/quiz"); }, 1500);
     } catch (error) {
       console.error("Error creating account:", error);
       if (error.code === 'auth/email-already-in-use') {
@@ -103,16 +140,30 @@ export default function AuthPage({ type }) {
     }
   };
 
-  // NEW: Complete Email Sign-In Logic
+  // Email Sign-In
   const handleEmailSignIn = async () => {
     if (!email || !password) {
       showNotificationWithMessage("❌ Please enter both email and password.");
       return;
     }
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      // Ensure Firestore user doc exists
+      const userDocRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userDocRef);
+      if (!snap.exists()) {
+        await setDoc(userDocRef, {
+          email: user.email,
+          displayName: user.displayName || "",
+          quizCompleted: false,
+        });
+        navigate("/quiz");
+        showNotificationWithMessage("✅ Welcome! Please take the quiz.");
+        return;
+      }
+      await redirectAfterAuth(user);
       showNotificationWithMessage("✅ Welcome back!");
-      setTimeout(() => { window.location.href = '/dashboard'; }, 1500);
     } catch (error) {
       console.error("Error signing in:", error);
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -125,25 +176,25 @@ export default function AuthPage({ type }) {
 
   return (
     <div className="auth-root-fullscreen">
-      <Notification 
-        message={notificationMessage} 
-        show={showNotification} 
+      <Notification
+        message={notificationMessage}
+        show={showNotification}
       />
 
       <div className="auth-left">
         <div className="auth-card-slider">
-            {cards.map((card, idx) => (
-              <div
-                key={idx}
-                className={`auth-card ${idx === active ? "auth-card-active" : ""}`}
-              >
-                <img src={card.img} alt={card.title} className="auth-card-img" />
-                <div className="auth-card-content">
-                  <h3>{card.title}</h3>
-                  <p className="auth-card-cost-desc">{card.desc}</p>
-                </div>
+          {cards.map((card, idx) => (
+            <div
+              key={idx}
+              className={`auth-card ${idx === active ? "auth-card-active" : ""}`}
+            >
+              <img src={card.img} alt={card.title} className="auth-card-img" />
+              <div className="auth-card-content">
+                <h3>{card.title}</h3>
+                <p className="auth-card-cost-desc">{card.desc}</p>
               </div>
-            ))}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -175,7 +226,7 @@ export default function AuthPage({ type }) {
               onChange={(e) => setFullName(e.target.value)}
             />
           )}
-          
+
           <input
             type="email"
             className="auth-input"
@@ -192,9 +243,8 @@ export default function AuthPage({ type }) {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <button 
-            className="auth-continue-btn" 
-            // UPDATED: Connects to the correct function based on the page type
+          <button
+            className="auth-continue-btn"
             onClick={isSignup ? handleEmailSignUp : handleEmailSignIn}
           >
             {isSignup ? "Create Account" : "Sign In"}
