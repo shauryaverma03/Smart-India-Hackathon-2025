@@ -1,7 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAuth } from "firebase/auth";
-import { doc, updateDoc, getFirestore } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, setDoc, doc } from "firebase/firestore";
 import "./QuizPage.css";
 
 // Quiz questions data structure
@@ -171,8 +171,19 @@ export default function QuizPage() {
   const [slide, setSlide] = useState("in");
   const [showCheck, setShowCheck] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [user, setUser] = useState(null); // Track logged-in user
   const timeoutRef = useRef(null);
   const navigate = useNavigate();
+
+  // Keep track of login state
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (u) => setUser(u));
+    return () => {
+      unsubscribe();
+      clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   const handleSingleSelect = (event) => {
     const newAnswers = [...answers];
@@ -235,18 +246,23 @@ export default function QuizPage() {
     setSubmitError("");
     setTimeout(async () => {
       try {
-        const auth = getAuth();
-        const db = getFirestore();
-        const user = auth.currentUser;
         if (!user) {
           setShowCheck(false);
           setSubmitError("You must be logged in to submit the quiz.");
           return;
         }
-        await updateDoc(doc(db, "users", user.uid), { 
-          quizCompleted: true,
-          quizAnswers: answers
-        });
+        const db = getFirestore();
+        // Build answers as an object instead of array
+const answersObj = {};
+quizQuestions.forEach((q, i) => {
+  answersObj[`q${i+1}`] = answers[i];
+});
+
+await setDoc(doc(db, "users", user.uid), {
+  quizCompleted: true,
+  quizAnswers: answersObj,
+  quizSubmittedAt: new Date().toISOString()
+}, { merge: true });
         setSubmitted(true);
 
         setTimeout(() => {
@@ -255,7 +271,7 @@ export default function QuizPage() {
       } catch (err) {
         setShowCheck(false);
         setSubmitError("Could not update quiz completion. Please try again or check your connection.");
-        console.error("Could not update quizCompleted in Firestore", err);
+        console.error("FIRESTORE ERROR:", err);
       }
     }, 1400);
   };
@@ -306,13 +322,9 @@ export default function QuizPage() {
           <div className={`quiz-question-outer slide-${slide}`}>
             <div className="quiz-question-inner">
               <div className="quiz-question">{q.question}</div>
-
-              {/* Helper text for multi select */}
               {q.type === "multi" && q.helper && (
                 <div className="quiz-multi-helper">{q.helper}</div>
               )}
-
-              {/* SINGLE SELECT */}
               {q.type === "single" && (
                 <div className="quiz-dropdown-wrap">
                   <select
@@ -328,8 +340,6 @@ export default function QuizPage() {
                   <span className="quiz-dropdown-arrow">&#9662;</span>
                 </div>
               )}
-
-              {/* MULTI SELECT */}
               {q.type === "multi" && (
                 <div className="quiz-checkbox-group">
                   {q.options.map((option, idx) => (
@@ -348,8 +358,6 @@ export default function QuizPage() {
                   ))}
                 </div>
               )}
-
-              {/* TEXT (optional) */}
               {q.type === "text" && (
                 <textarea
                   className="quiz-textarea"
