@@ -1,0 +1,197 @@
+.settings-container {
+  background: #fff;
+  border-radius: 22px;
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  max-width: 500px;
+  margin: 40px auto 0 auto;
+  box-shadow: 0 12px 36px 0 rgba(62, 62, 135, 0.07);
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.6rem;
+  text-align: left;
+  letter-spacing: -0.5px;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+}
+
+.settings-section h3 {
+  margin-bottom: 0.8rem;
+  font-size: 1.13rem;
+  font-weight: 600;
+  color: #232359;
+}
+
+.settings-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.settings-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2.5px solid #f4f6fc;
+  background: #f8fafc;
+}
+
+.settings-profile-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.settings-profile-fields label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-profile-fields input {
+  margin-top: 3px;
+  font-size: 1rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1.1px solid #dde0e8;
+  background: #f7f9fc;
+}
+
+.settings-profile-grid {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.8rem;
+}
+
+.settings-profile-grid label {
+  flex: 1;
+  font-size: 1rem;
+}
+
+.settings-profile-grid input {
+  margin-top: 3px;
+  font-size: 1rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1.1px solid #dde0e8;
+  background: #f7f9fc;
+}
+
+.settings-section textarea {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 4px;
+  font-size: 1rem;
+  padding: 7px 10px;
+  border-radius: 7px;
+  border: 1.1px solid #dde0e8;
+  background: #f7f9fc;
+  resize: vertical;
+}
+
+.settings-section label {
+  margin-bottom: 0.7rem;
+  font-weight: 500;
+  color: #30305d;
+  display: flex;
+  flex-direction: column;
+  font-size: 1rem;
+}
+
+.settings-section {
+  margin-bottom: 1.2rem;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 1.1rem;
+  margin-top: 1.2rem;
+}
+
+.edit-btn,
+.save-btn {
+  background: #377dff;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 9px 23px;
+  font-weight: 600;
+  font-size: 1.07rem;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.save-btn:disabled {
+  background: #a8a8d7;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: #f4f6fc;
+  color: #232359;
+  border: none;
+  border-radius: 7px;
+  padding: 9px 23px;
+  font-weight: 500;
+  font-size: 1.07rem;
+  cursor: pointer;
+}
+
+.signout-btn {
+  background: #ff5a5a;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 7px 18px;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.7rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.settings-success {
+  color: #2dbb55;
+  margin-top: 1.1rem;
+  font-weight: 600;
+}
+
+.settings-error {
+  color: #f54e42;
+  margin-top: 1.1rem;
+  font-weight: 600;
+}
+
+.floating-save-btn {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  background: #377dff;
+  color: #fff;
+  border: none;
+  border-radius: 40px;
+  padding: 14px 36px;
+  font-weight: 700;
+  font-size: 1.13rem;
+  box-shadow: 0 4px 24px rgba(62,62,135,0.14);
+  cursor: pointer;
+  z-index: 1002;
+  transition: background 0.18s, box-shadow 0.18s;
+}
+.floating-save-btn:disabled {
+  background: #a8a8d7;
+  cursor: not-allowed;
+  box-shadow: none;
+}

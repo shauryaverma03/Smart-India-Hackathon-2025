@@ -3,8 +3,9 @@ import PeoplePage from "./PeoplePage";
 import NotificationsPage from "./NotificationsPage";
 import MessagesPage from "./MessagesPage";
 import DreamFlowPage from "./DreamFlowPage";
-import ResumeAnalyserPage from "./ResumeAnalyserPage"; // <-- Import the new page
-import { collection, collectionGroup, query, where, onSnapshot } from "firebase/firestore"; 
+import ResumeAnalyserPage from "./ResumeAnalyserPage";
+import Settings from "./Settings"; // <-- Import Settings page
+import { collection, collectionGroup, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import {
   MdPeople,
@@ -21,7 +22,7 @@ import {
   MdAutoAwesome
 } from "react-icons/md";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./Dashboard.css";
 
 const SIDEBAR_MENU = [
@@ -34,7 +35,7 @@ const SIDEBAR_MENU = [
   { name: "Messages", icon: <MdChat /> },
   { name: "Events", icon: <MdEvent /> },
   { name: "Resume Builder", icon: <MdDescription /> },
-  { name: "Resume Analyser", icon: <MdDescription /> }, // <-- Added here
+  { name: "Resume Analyser", icon: <MdDescription /> },
   { name: "Settings", icon: <MdSettings /> },
 ];
 
@@ -42,6 +43,13 @@ function getInitial(name, email) {
   if (name && name.length > 0) return name[0].toUpperCase();
   if (email && email.length > 0) return email[0].toUpperCase();
   return "?";
+}
+
+// Helper to detect settings tab from query param
+function getTabFromQuery(location) {
+  const params = new URLSearchParams(location.search);
+  if (params.get("tab") === "settings") return 10; // Settings index
+  return null;
 }
 
 export default function Dashboard() {
@@ -55,6 +63,13 @@ export default function Dashboard() {
   const [notificationCount, setNotificationCount] = useState(0);
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Keep activeIndex in sync with ?tab=settings
+  useEffect(() => {
+    const idx = getTabFromQuery(location);
+    if (idx !== null) setActiveIndex(idx);
+  }, [location]);
 
   useEffect(() => {
     const auth = getAuth();
@@ -105,6 +120,16 @@ export default function Dashboard() {
   function handleSidebarSelect(idx) {
     setActiveIndex(idx);
     setSidebarOpen(false);
+
+    // Special navigation for Settings tab (uses ?tab=settings)
+    if (SIDEBAR_MENU[idx].name === "Settings") {
+      navigate("/dashboard?tab=settings");
+    } else {
+      // For all other tabs, remove query param if present
+      if (location.search) {
+        navigate("/dashboard");
+      }
+    }
   }
 
   function handleSidebarToggle() {
@@ -132,12 +157,18 @@ export default function Dashboard() {
         </div>
       );
     }
+
+    // Show Settings tab if active
+    if (activeIndex === 10) {
+      return <Settings currentUser={user} />;
+    }
+
     switch (activeIndex) {
       case 0: return <PeoplePage userName={userName || userEmail} currentUser={user} />;
       case 4: return <DreamFlowPage currentUser={user} />;
       case 5: return <NotificationsPage currentUser={user} />;
       case 6: return <MessagesPage currentUser={user} />;
-      case 9: return <ResumeAnalyserPage currentUser={user} />; // Resume Analyser
+      case 9: return <ResumeAnalyserPage currentUser={user} />;
       default:
         return (
           <div className="dashboard-center">

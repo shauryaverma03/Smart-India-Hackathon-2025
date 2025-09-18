@@ -6,6 +6,7 @@ import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import ChatPage from "./pages/ChatPage";
 import QuizPage from "./pages/QuizPage";
+import Settings from "./pages/Settings"; // <-- Add this import
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -99,6 +100,15 @@ export default function App() {
         element={
           <RequireQuizCompleted>
             <ChatPage />
+          </RequireQuizCompleted>
+        }
+      />
+      {/* Settings page: Require quiz completed */}
+      <Route
+        path="/settings"
+        element={
+          <RequireQuizCompleted>
+            <Settings />
           </RequireQuizCompleted>
         }
       />

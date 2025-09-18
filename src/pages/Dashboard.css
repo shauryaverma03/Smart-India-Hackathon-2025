@@ -534,3 +534,67 @@
   justify-content: center;
   border: 2px solid var(--cf-card-bg);
 }
+
+.dashboard-root {
+  display: flex;
+  min-height: 100vh;
+  background: #f7f9fc;
+}
+
+/* Make the sidebar fixed */
+.dashboard-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 220px;
+  height: 100vh;
+  background: #fff;
+  border-right: 1.5px solid #f0f1f7;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  transition: left 0.2s;
+}
+
+.dashboard-main {
+  flex: 1;
+  min-height: 100vh;
+  margin-left: 220px; /* Push content to right of fixed sidebar */
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-sidebar-overlay {
+  display: none; /* Hide overlay for desktop/fixed sidebar */
+}
+
+/* Responsive: for mobile, you can override to absolute and show overlay */
+@media (max-width: 900px) {
+  .dashboard-sidebar {
+    position: absolute;
+    left: -220px;
+    top: 0;
+    z-index: 2001;
+    transition: left 0.2s;
+  }
+  .dashboard-sidebar.open {
+    left: 0;
+  }
+  .dashboard-main {
+    margin-left: 0;
+  }
+  .dashboard-sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(40,50,90,0.25);
+    z-index: 2000;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .dashboard-sidebar-overlay:not(.open) {
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
