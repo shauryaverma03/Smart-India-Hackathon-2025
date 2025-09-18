@@ -5,25 +5,26 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage"
-
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCQ0X7aXiiBxDLCXf_rp3CpNelypTpMAUo",
-  authDomain: "carrerflow-a73c1.firebaseapp.com",
-  projectId: "carrerflow-a73c1",
-  storageBucket: "carrerflow-a73c1.firebasestorage.app",
-  messagingSenderId: "391235321572",
-  appId: "1:391235321572:web:5895cd68d3487c038bb6f1",
-  measurementId: "G-98NVRH3QQB"
+  apiKey: "AIzaSyBiH_4zMWuMwR-SR9b36rpklpcYn23qOmI",
+  authDomain: "careerflowai-aaa71.firebaseapp.com",
+  projectId: "careerflowai-aaa71",
+  storageBucket: "careerflowai-aaa71.appspot.com",
+  messagingSenderId: "607069896142",
+  appId: "1:607069896142:web:7d37c8419e63c441beff9f",
+  measurementId: "G-S630ZM28HN"
 };
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-export const auth = getAuth(app); // Export auth instance
+// Only initialize analytics if running in the browser (not on server)
+let analytics;
+if (typeof window !== "undefined") {
+  analytics = getAnalytics(app);
+}
+export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
