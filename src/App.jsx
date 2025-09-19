@@ -10,6 +10,7 @@ import Settings from "./pages/Settings";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
+import LoadingScreen from "./components/LoadingScreen"; // <-- Import here
 import "./HomePage.css";
 
 // Route guard for dashboard and chat (add more as needed)
@@ -19,10 +20,10 @@ function RequireQuizCompleted({ children }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkQuiz = async () => {
-      const user = auth.currentUser;
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (!user) {
         navigate("/login");
+        setLoading(false);
         return;
       }
       try {
@@ -36,12 +37,11 @@ function RequireQuizCompleted({ children }) {
         navigate("/quiz");
       }
       setLoading(false);
-    };
-    checkQuiz();
-    // eslint-disable-next-line
-  }, []);
+    });
+    return () => unsubscribe();
+  }, [navigate]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <LoadingScreen />; // <-- Use the new component here
   return allow ? children : null;
 }
 
