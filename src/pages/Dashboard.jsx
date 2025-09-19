@@ -13,7 +13,6 @@ import { collection, collectionGroup, query, where, onSnapshot } from "firebase/
 import { db } from "../firebase";
 import {
   MdPeople,
-  MdStyle,
   MdWork,
   MdGroups,
   MdEvent,
@@ -29,9 +28,9 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Dashboard.css";
 
+// --- "Style" has been removed from this array ---
 const SIDEBAR_MENU = [
   { name: "People", icon: <MdPeople /> },
-  { name: "Style", icon: <MdStyle /> },
   { name: "Jobs", icon: <MdWork /> },
   { name: "Community", icon: <MdGroups /> },
   { name: "DreamFlow AI", icon: <MdAutoAwesome /> },
@@ -63,7 +62,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // This useEffect remains for handling URL-based tab switching for settings
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get("tab") === "settings") {
@@ -71,21 +69,17 @@ export default function Dashboard() {
       if (settingsIndex !== -1) setActiveIndex(settingsIndex);
     }
   }, [location.search]);
-
-  // --- ADD THIS EFFECT TO HANDLE NAVIGATION FROM HISTORY ---
+  
   useEffect(() => {
-    // When we navigate from the history page, the state will contain 'from: "history"'
     if (location.state?.from === 'history') {
       const dreamflowAiIndex = SIDEBAR_MENU.findIndex(item => item.name === "DreamFlow AI");
       if (dreamflowAiIndex !== -1) {
         setActiveIndex(dreamflowAiIndex);
-        // Clear the state so it doesn't trigger again on a refresh
         navigate(location.pathname, { replace: true, state: {} });
       }
     }
   }, [location.state, navigate]);
-
-  // All other useEffects for auth and notifications remain the same
+  
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -102,7 +96,7 @@ export default function Dashboard() {
     });
     return () => unsubscribe();
   }, []);
-
+  
   useEffect(() => {
     if (!user) {
       setNotificationCount(0);
@@ -114,13 +108,11 @@ export default function Dashboard() {
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       setNotificationCount(querySnapshot.size);
     });
-
     const requestsRef = collection(db, "connectionRequests");
     const reqQuery = query(requestsRef, where("mentorId", "==", user.uid), where("status", "==", "pending"));
     const unsubscribeRequests = onSnapshot(reqQuery, (querySnapshot) => {
       setConnectionRequestCount(querySnapshot.size);
     });
-
     return () => {
       unsubscribe();
       unsubscribeRequests();
@@ -143,8 +135,6 @@ export default function Dashboard() {
   function handleSidebarSelect(idx) {
     setActiveIndex(idx);
     setSidebarOpen(false);
-
-    // Optional: Update the URL for settings tab
     if (SIDEBAR_MENU[idx].name === "Settings") {
       navigate("/dashboard?tab=settings");
     } else {
@@ -153,58 +143,47 @@ export default function Dashboard() {
       }
     }
   }
+  function handleSidebarToggle() { setSidebarOpen((open) => !open); }
+  function handleLogoClick() { navigate("/"); setSidebarOpen(false); }
+  function handleLoginRedirect() { navigate("/login"); }
 
-  function handleSidebarToggle() {
-    setSidebarOpen((open) => !open);
-  }
-
-  function handleLogoClick() {
-    navigate("/");
-    setSidebarOpen(false);
-  }
-
-  function handleLoginRedirect() {
-    navigate("/login");
-  }
-
+  // --- This function is now corrected and dynamic ---
   function renderContent() {
     if (!isLoggedIn) {
       return (
         <div className="dashboard-center">
           <div className="dashboard-card dashboard-community-card fade-in">
             <h2>Welcome to CareerFlow!</h2>
-            <p className="dashboard-community-desc">Please log in to access your dashboard and find mentors!</p>
+            <p className="dashboard-community-desc">Please log in to access your dashboard.</p>
             <button className="dashboard-login-btn" onClick={handleLoginRedirect}>Login</button>
           </div>
         </div>
       );
     }
 
-    if (activeIndex === 10) {
-      return <Settings currentUser={user} />;
-    }
-    if (activeIndex === 8) {
-      return <ResumeBuilder />;
-    }
-    if (activeIndex === 7) {
-      return <EventsPage />;
-    }
+    const PageNotBuilt = () => (
+      <div className="dashboard-center">
+        <div className="dashboard-card dashboard-community-card fade-in">
+          <h2>Page Not Built Yet</h2>
+          <p className="dashboard-community-desc">Select another page from the sidebar.</p>
+        </div>
+      </div>
+    );
+    
+    const selectedItemName = SIDEBAR_MENU[activeIndex]?.name;
 
-    switch (activeIndex) {
-      case 0: return <PeoplePage userName={userName || userEmail} currentUser={user} />;
-      case 4: return <DreamFlowPage currentUser={user} />;
-      case 5: return <NotificationsPage currentUser={user} />;
-      case 6: return <MessagesPage currentUser={user} />;
-      case 9: return <ResumeAnalyserPage currentUser={user} />;
+    switch (selectedItemName) {
+      case "People": return <PeoplePage userName={userName || userEmail} currentUser={user} />;
+      case "DreamFlow AI": return <DreamFlowPage currentUser={user} />;
+      case "Notifications": return <NotificationsPage currentUser={user} />;
+      case "Messages": return <MessagesPage currentUser={user} />;
+      case "Events": return <EventsPage />;
+      case "Resume Builder": return <ResumeBuilder />;
+      case "Resume Analyser": return <ResumeAnalyserPage currentUser={user} />;
+      case "Settings": return <Settings currentUser={user} />;
       default:
-        return (
-          <div className="dashboard-center">
-            <div className="dashboard-card dashboard-community-card fade-in">
-              <h2>Page Not Built Yet</h2>
-              <p className="dashboard-community-desc">Select another page from the sidebar to continue.</p>
-            </div>
-          </div>
-        );
+        // "Jobs" and "Community" will fall through to here
+        return <PageNotBuilt />;
     }
   }
 
@@ -215,18 +194,17 @@ export default function Dashboard() {
         <div className="dashboard-logo-row" onClick={handleLogoClick}>
           <img src="/logo.png" alt="CareerFlow Logo" className="dashboard-logo" />
           <span className="dashboard-title">CareerFlow</span>
-          <button className="dashboard-sidebar-close" onClick={handleSidebarToggle} aria-label="Close sidebar"><MdClose size={22} /></button>
+          <button className="dashboard-sidebar-close" onClick={handleSidebarToggle}><MdClose size={22} /></button>
         </div>
         <nav className="dashboard-menu">
           {SIDEBAR_MENU.map((item, idx) => (
             <button 
               key={item.name} 
-              className={`dashboard-menu-btn ${item.name === "DreamFlow AI" ? "dreamflow-menu-btn" : ""} ${activeIndex === idx ? " active" : ""}`} 
+              className={`dashboard-menu-btn ${activeIndex === idx ? " active" : ""}`} 
               onClick={() => handleSidebarSelect(idx)} 
-              tabIndex={0} 
               disabled={!isLoggedIn && item.name !== 'People'}
             >
-              <span className={`dashboard-menu-icon${activeIndex === idx ? " active" : ""}`}>
+              <span className="dashboard-menu-icon">
                 {item.icon}
                 {(item.name === "Notifications" && (notificationCount + connectionRequestCount) > 0) && (
                   <span className="notification-badge">{notificationCount + connectionRequestCount}</span>
@@ -235,7 +213,7 @@ export default function Dashboard() {
                   <span className="notification-badge">{unreadMessageCount}</span>
                 )}
               </span>
-              <span className={`dashboard-menu-label${activeIndex === idx ? " active" : ""}`}>{item.name}</span>
+              <span className="dashboard-menu-label">{item.name}</span>
             </button>
           ))}
         </nav>
@@ -243,7 +221,7 @@ export default function Dashboard() {
       <main className="dashboard-main">
         <header className="dashboard-header">
           <div className="dashboard-header-mobile-left">
-            <button className="dashboard-menu-toggle" onClick={handleSidebarToggle} aria-label="Open sidebar"><MdMenu size={28} /></button>
+            <button className="dashboard-menu-toggle" onClick={handleSidebarToggle}><MdMenu size={28} /></button>
             <div className="dashboard-header-logo-brand" onClick={handleLogoClick}>
               <img src="/logo.png" alt="CareerFlow Logo" className="dashboard-header-logo" />
               <span className="dashboard-header-title">CareerFlow</span>
@@ -255,7 +233,7 @@ export default function Dashboard() {
                 <span className="dashboard-welcome">Welcome, <strong>{userName || userEmail}</strong></span>
                 <span className="dashboard-avatar">
                   {userAvatar ? (
-                    <img src={userAvatar} alt="User avatar" className="dashboard-avatar-img" onError={e => { e.target.onerror=null; e.target.src="/avatar-placeholder.png"; }} />
+                    <img src={userAvatar} alt="User avatar" className="dashboard-avatar-img" />
                   ) : (
                     <span className="dashboard-avatar-initial">{getInitial(userName, userEmail)}</span>
                   )}
