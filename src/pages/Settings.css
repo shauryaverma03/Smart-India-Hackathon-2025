@@ -9,10 +9,10 @@
   overflow: hidden;
 }
 
-/* Add scroll to the whole settings modal if content overflows */
+/* Increase the width of the settings card */
 .settings-slider {
   position: relative;
-  width: 420px;
+  width: 480px; /* was 420px, increased for more spacious feel */
   max-width: 98vw;
   height: 600px;
   margin: auto;
@@ -25,7 +25,6 @@
   transition: box-shadow 0.18s;
 }
 
-/* Enable vertical scroll for the panel if content is long */
 .settings-menu-panel {
   position: absolute;
   width: 100%;
@@ -84,7 +83,6 @@
   text-align: center;
 }
 
-/* You can wrap the list in this if you want a scrollable area for just the menu */
 .settings-menu-scroll-area {
   flex: 1 1 auto;
   overflow-y: auto;
@@ -114,25 +112,49 @@
   color: #232359;
   font-size: 1.09rem;
   cursor: pointer;
-  border-radius: 0 28px 28px 0;
-  transition: background 0.16s, color 0.16s;
+  border-radius: 0 24px 24px 0;
+  transition: 
+    background 0.12s,
+    color 0.12s,
+    font-weight 0.12s,
+    box-shadow 0.18s;
   font-family: inherit;
   font-weight: 500;
+  position: relative;
+  box-shadow: 0 0px 0px rgba(56, 100, 255, 0.07);
 }
 
 .settings-menu-list-btn.active,
-.settings-menu-list-btn:hover,
 .settings-menu-list-btn:focus {
-  background: #eaf3fe;
-  color: #377dff;
+  background: #eaf0fc;
+  color: #2046c7;
   font-weight: 700;
+  box-shadow: 0 2px 6px rgba(56, 100, 255, 0.08);
+}
+
+.settings-menu-list-btn:hover:not(.active) {
+  background: #f4f7fd;
+  color: #377dff;
+  font-weight: 600;
+}
+
+.settings-menu-list-btn.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 5px;
+  border-radius: 4px;
+  background: #377dff;
+  opacity: 0.7;
 }
 
 .settings-menu-list-icon {
   font-size: 1.45rem;
   display: flex;
   align-items: center;
-  color: #232359;
+  color: inherit;
   transition: color 0.18s;
 }
 .settings-menu-list-btn.active .settings-menu-list-icon,
@@ -157,7 +179,6 @@
   color: #232359;
 }
 
-/* Enable scroll for the details panel */
 .settings-details-panel {
   position: absolute;
   width: 100%;
@@ -170,7 +191,7 @@
   z-index: 3;
   padding: 0;
   transform: translateX(100%);
-  overflow-y: auto;    /* <--- Add scroll here */
+  overflow-y: auto;
 }
 
 .settings-slider.show-details .settings-menu-panel {
@@ -187,6 +208,17 @@
   height: 100%;
   box-sizing: border-box;
   overflow-y: auto;
+}
+
+.settings-details-content h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2046c7;
+  margin-bottom: 22px;
+  letter-spacing: 0.01em;
+  border-bottom: 1.5px solid #eaf3fe;
+  padding-bottom: 4px;
+  background: none;
 }
 
 .settings-field {
@@ -209,9 +241,55 @@
   font-size: 1rem;
   background: #f7f8fa;
   margin-top: 2px;
+  transition: border-color 0.16s, box-shadow 0.16s;
 }
 
-/* --- Logout Button --- */
+.settings-field > input:focus,
+.settings-field > select:focus,
+.settings-field > textarea:focus {
+  border-color: #b5d4ff;
+  box-shadow: 0 0 0 2px #eaf3fe;
+  outline: none;
+}
+
+.settings-field > input:hover,
+.settings-field > select:hover,
+.settings-field > textarea:hover {
+  border-color: #d0d8ef;
+}
+
+.settings-details-content button {
+  margin-top: 10px;
+  padding: 9px 28px;
+  background: linear-gradient(90deg, #377dff 60%, #2046c7 100%);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px 0 rgba(56, 125, 255, 0.08);
+  letter-spacing: 0.02em;
+  transition: 
+    background 0.18s, 
+    box-shadow 0.18s, 
+    transform 0.1s,
+    opacity 0.13s;
+  outline: none;
+}
+.settings-details-content button:disabled {
+  background: #c8d0ee;
+  color: #f7f8fa;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.settings-details-content button:not(:disabled):hover,
+.settings-details-content button:not(:disabled):focus {
+  background: linear-gradient(90deg, #2046c7 60%, #377dff 100%);
+  box-shadow: 0 4px 16px 0 rgba(56, 125, 255, 0.13);
+  transform: translateY(-1px) scale(1.03);
+}
+
 .settings-logout-row {
   width: 100%;
   padding: 8px 0;
@@ -252,7 +330,6 @@
   margin-right: 4px;
 }
 
-/* Quiz specific styles */
 .quiz-answers-list {
   max-height: 360px;
   overflow-y: auto;
@@ -265,7 +342,16 @@
   gap: 8px;
 }
 
-/* Scrollbar for menu */
+.quiz-checkbox-group label {
+  background: #f7fafd;
+  border-radius: 7px;
+  padding: 5px 10px;
+  transition: background 0.13s;
+}
+.quiz-checkbox-group label:hover {
+  background: #eaf3fe;
+}
+
 .settings-menu-scroll-area::-webkit-scrollbar {
   width: 8px;
 }
@@ -274,7 +360,6 @@
   border-radius: 8px;
 }
 
-/* Custom scrollbars for panels (optional, for webkit browsers) */
 .settings-details-panel::-webkit-scrollbar,
 .settings-menu-panel::-webkit-scrollbar {
   width: 8px;
@@ -283,4 +368,28 @@
 .settings-menu-panel::-webkit-scrollbar-thumb {
   background: #f0f4fa;
   border-radius: 8px;
+}
+
+.settings-details-content > div {
+  background: #f8faff;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px 0 rgba(40, 60, 100, 0.07);
+  padding: 34px 28px 22px 28px;
+  margin-bottom: 18px;
+  transition: box-shadow 0.12s;
+}
+.settings-details-content > div:hover {
+  box-shadow: 0 6px 18px 0 rgba(40, 60, 100, 0.13);
+}
+
+@media (max-width: 540px) {
+  .settings-slider {
+    width: 99vw;
+    min-width: unset;
+    height: 99vh;
+    border-radius: 0;
+  }
+  .settings-details-content > div {
+    padding: 20px 8px 16px 8px;
+  }
 }
