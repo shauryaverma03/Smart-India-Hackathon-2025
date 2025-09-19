@@ -1,4 +1,7 @@
+// src/pages/Settings.jsx
+
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   MdArrowBack,
   MdSettings,
@@ -8,20 +11,23 @@ import {
   MdDataUsage,
   MdAccountBox,
   MdLogout,
+  MdHistory, // --- 1. IMPORT HISTORY ICON ---
 } from "react-icons/md";
 import { db, auth } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import "./Settings.css";
 import { quizQuestions } from "../quizData";
-import { useNavigate } from "react-router-dom";
+import HistoryPage from './settingsSections/HistoryPage'; // --- 1. IMPORT HISTORY PAGE ---
 
+// --- 2. ADD HISTORY TO THE MENU ---
 const SECTIONS = [
   { key: "general", label: "General", icon: <MdSettings /> },
   { key: "notifications", label: "Notifications", icon: <MdNotifications /> },
   { key: "personalization", label: "Personalization", icon: <MdPerson /> },
   { key: "connected-apps", label: "Connected Apps", icon: <MdApps /> },
   { key: "data-controls", label: "Quiz Answers", icon: <MdDataUsage /> },
+  { key: "history", label: "Conversation History", icon: <MdHistory /> }, // Added here
   { key: "account", label: "Account", icon: <MdAccountBox /> },
 ];
 
@@ -317,7 +323,6 @@ function AccountSection({ userData, onSave, loading }) {
     </div>
   );
 }
-
 // --- Main Settings Page ---
 export default function Settings({ currentUser }) {
   const [selected, setSelected] = useState(null);
@@ -326,32 +331,22 @@ export default function Settings({ currentUser }) {
   const user = currentUser;
   const navigate = useNavigate();
 
-  // Fetch user data from Firestore
+  // Fetch user data from Firestore (remains unchanged)
   useEffect(() => {
     const fetchUserData = async () => {
       if (!user) return;
       const userRef = doc(db, "users", user.uid);
       const snap = await getDoc(userRef);
       if (snap.exists()) {
-        setUserData({
-          ...snap.data(),
-          displayName: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-        });
+        setUserData({ ...snap.data(), displayName: user.displayName, email: user.email, photoURL: user.photoURL });
       } else {
-        setUserData({
-          displayName: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-        });
+        setUserData({ displayName: user.displayName, email: user.email, photoURL: user.photoURL });
       }
     };
     fetchUserData();
-    // eslint-disable-next-line
   }, [user]);
 
-  // Save section data to Firestore (only the intended fields!)
+  // Save section data to Firestore (remains unchanged)
   const handleSectionSave = async (data) => {
     if (!user) return;
     setLoading(true);
@@ -366,7 +361,7 @@ export default function Settings({ currentUser }) {
     setLoading(false);
   };
 
-  // Logout function
+  // Logout function (remains unchanged)
   const handleLogout = async () => {
     setLoading(true);
     try {
@@ -379,43 +374,34 @@ export default function Settings({ currentUser }) {
     }
   };
 
+  // --- 3. ADD HISTORY TO THE SWITCH CASE ---
   let SectionComponent = null;
   switch (selected) {
     case "general":
-      SectionComponent = (
-        <GeneralSection userData={userData} onSave={handleSectionSave} loading={loading} />
-      );
+      SectionComponent = <GeneralSection userData={userData} onSave={handleSectionSave} loading={loading} />;
       break;
     case "notifications":
-      SectionComponent = (
-        <NotificationsSection userData={userData} onSave={handleSectionSave} loading={loading} />
-      );
+      SectionComponent = <NotificationsSection userData={userData} onSave={handleSectionSave} loading={loading} />;
       break;
     case "personalization":
-      SectionComponent = (
-        <PersonalizationSection userData={userData} onSave={handleSectionSave} loading={loading} />
-      );
+      SectionComponent = <PersonalizationSection userData={userData} onSave={handleSectionSave} loading={loading} />;
       break;
     case "connected-apps":
-      SectionComponent = (
-        <ConnectedAppsSection userData={userData} onSave={handleSectionSave} loading={loading} />
-      );
+      SectionComponent = <ConnectedAppsSection userData={userData} onSave={handleSectionSave} loading={loading} />;
       break;
     case "data-controls":
-      SectionComponent = (
-        <QuizAnswersSection userData={userData} onSave={handleSectionSave} loading={loading} />
-      );
+      SectionComponent = <QuizAnswersSection userData={userData} onSave={handleSectionSave} loading={loading} />;
+      break;
+    case "history": // Added case for history
+      SectionComponent = <HistoryPage currentUser={user} />;
       break;
     case "account":
-      SectionComponent = (
-        <AccountSection userData={userData} onSave={handleSectionSave} loading={loading} />
-      );
+      SectionComponent = <AccountSection userData={userData} onSave={handleSectionSave} loading={loading} />;
       break;
     default:
       SectionComponent = null;
   }
 
-  // Helper for user initials if no photo
   function getInitial(name, email) {
     if (name && name.length > 0) return name[0].toUpperCase();
     if (email && email.length > 0) return email[0].toUpperCase();
@@ -425,19 +411,11 @@ export default function Settings({ currentUser }) {
   return (
     <div className="slide-settings-root">
       <div className={`settings-slider ${selected ? "show-details" : ""}`}>
-        {/* MENU PANEL */}
+        {/* MENU PANEL (remains unchanged) */}
         <div className="settings-menu-panel">
           <div className="settings-profile-centered">
             {userData.photoURL ? (
-              <img
-                src={userData.photoURL}
-                alt="Profile"
-                className="settings-profile-photo-lg"
-                onError={e => {
-                  e.target.onerror = null;
-                  e.target.src = "/avatar-placeholder.png";
-                }}
-              />
+              <img src={userData.photoURL} alt="Profile" className="settings-profile-photo-lg" />
             ) : (
               <div className="settings-profile-photo-lg settings-profile-initials">
                 {getInitial(userData.displayName, userData.email)}
@@ -458,7 +436,6 @@ export default function Settings({ currentUser }) {
               </button>
             ))}
           </div>
-          {/* Add the logout button at the bottom */}
           <div className="settings-logout-row">
             <button
               className="settings-logout-btn"
@@ -470,7 +447,7 @@ export default function Settings({ currentUser }) {
             </button>
           </div>
         </div>
-        {/* DETAILS PANEL */}
+        {/* DETAILS PANEL (now includes history) */}
         <div className="settings-details-panel">
           <button className="settings-back-btn" onClick={() => setSelected(null)}>
             <MdArrowBack size={28} />

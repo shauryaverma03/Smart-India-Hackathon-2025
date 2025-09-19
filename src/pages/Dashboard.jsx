@@ -1,3 +1,5 @@
+// src/pages/Dashboard.jsx
+
 import React, { useEffect, useState } from "react";
 import PeoplePage from "./PeoplePage";
 import NotificationsPage from "./NotificationsPage";
@@ -46,12 +48,6 @@ function getInitial(name, email) {
   return "?";
 }
 
-function getTabFromQuery(location) {
-  const params = new URLSearchParams(location.search);
-  if (params.get("tab") === "settings") return 10;
-  return null;
-}
-
 export default function Dashboard() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -61,16 +57,34 @@ export default function Dashboard() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [notificationCount, setNotificationCount] = useState(0);
-  const [connectionRequestCount, setConnectionRequestCount] = useState(0);  // New state for connection requests
+  const [connectionRequestCount, setConnectionRequestCount] = useState(0);
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
 
+  // This useEffect remains for handling URL-based tab switching for settings
   useEffect(() => {
-    const idx = getTabFromQuery(location);
-    if (idx !== null) setActiveIndex(idx);
-  }, [location]);
+    const params = new URLSearchParams(location.search);
+    if (params.get("tab") === "settings") {
+      const settingsIndex = SIDEBAR_MENU.findIndex(item => item.name === "Settings");
+      if (settingsIndex !== -1) setActiveIndex(settingsIndex);
+    }
+  }, [location.search]);
 
+  // --- ADD THIS EFFECT TO HANDLE NAVIGATION FROM HISTORY ---
+  useEffect(() => {
+    // When we navigate from the history page, the state will contain 'from: "history"'
+    if (location.state?.from === 'history') {
+      const dreamflowAiIndex = SIDEBAR_MENU.findIndex(item => item.name === "DreamFlow AI");
+      if (dreamflowAiIndex !== -1) {
+        setActiveIndex(dreamflowAiIndex);
+        // Clear the state so it doesn't trigger again on a refresh
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  }, [location.state, navigate]);
+
+  // All other useEffects for auth and notifications remain the same
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -83,9 +97,6 @@ export default function Dashboard() {
       } else {
         setUser(null);
         setIsLoggedIn(false);
-        setUserName("");
-        setUserEmail("");
-        setUserAvatar("");
       }
     });
     return () => unsubscribe();
@@ -97,14 +108,12 @@ export default function Dashboard() {
       setConnectionRequestCount(0);
       return;
     }
-    // Listen for unread generic notifications
     const notificationsRef = collection(db, "notifications");
     const q = query(notificationsRef, where("userId", "==", user.uid), where("isRead", "==", false));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       setNotificationCount(querySnapshot.size);
     });
 
-    // Listen for pending connection requests where user is mentor
     const requestsRef = collection(db, "connectionRequests");
     const reqQuery = query(requestsRef, where("mentorId", "==", user.uid), where("status", "==", "pending"));
     const unsubscribeRequests = onSnapshot(reqQuery, (querySnapshot) => {

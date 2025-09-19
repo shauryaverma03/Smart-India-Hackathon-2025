@@ -1735,7 +1735,7 @@ export default function ResumeBuilder() {
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, duration: 0.6, type: "spring" }}
         >
-          ✨ Resume Builder Pro 2025
+          ✨ Resume Builder CarrerFlow
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}

@@ -1,26 +1,58 @@
 // src/pages/DreamFlowPage.jsx
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { streamBotResponse } from '../services/counselorService';
 import MessageList from '../components/MessageList.jsx';
 import MessageInput from '../components/MessageInput.jsx';
+import { db, auth } from '../firebase'; // Import Firebase
+import { onAuthStateChanged } from "firebase/auth";
+import { collection, addDoc, query, orderBy, getDocs, writeBatch, serverTimestamp } from 'firebase/firestore';
 import './DreamFlowPage.css';
 
+const HISTORY_LIMIT = 20;
+
 function DreamFlowPage() {
+  const location = useLocation();
+  const historicalChat = location.state?.loadHistory;
+
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState('');
-  const [showWelcomeScreen, setShowWelcomeScreen] = useState(true);
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(!historicalChat); // Don't show welcome if loading history
   const [isThinking, setIsThinking] = useState(false);
   const [welcomeAnimationComplete, setWelcomeAnimationComplete] = useState(false);
-  const [hasStartedConversation, setHasStartedConversation] = useState(false);
+  const [hasStartedConversation, setHasStartedConversation] = useState(!!historicalChat);
+  const [currentUser, setCurrentUser] = useState(null);
+
   const logoRef = useRef(null);
   const messageAreaRef = useRef(null);
+  const messagesRef = useRef(messages); // Ref to hold the latest messages for saving
 
+  // Update the ref whenever messages change
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  // Effect to get the current user
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Main setup effect for session, animations, and loading history
   useEffect(() => {
     setSessionId(uuidv4());
-    if (showWelcomeScreen) {
+
+    if (historicalChat) {
+      // If we are loading a historical chat, set the messages and skip welcome screen
+      setMessages(historicalChat);
+      setShowWelcomeScreen(false);
+    } else if (showWelcomeScreen) {
+      // Otherwise, run the welcome animation
       const animationSequence = async () => {
         await new Promise(resolve => setTimeout(resolve, 500));
         if (logoRef.current) {
@@ -31,8 +63,56 @@ function DreamFlowPage() {
       };
       animationSequence();
     }
-  }, [showWelcomeScreen]);
+  }, [showWelcomeScreen, historicalChat]);
 
+  // --- ADDED: useEffect to save conversation history on unmount ---
+  useEffect(() => {
+    return () => {
+      const currentMessages = messagesRef.current;
+      // Only save if there's a user and the conversation has more than just the initial bot message
+      if (currentUser && currentMessages.length > 1) {
+        // Check if it's a new conversation or a continued one
+        const isNewInteraction = !historicalChat || currentMessages.length > historicalChat.length;
+        if (isNewInteraction) {
+          saveConversationHistory(currentMessages);
+        }
+      }
+    };
+  }, [currentUser, historicalChat]); // Depend on user and historicalChat to set up the cleanup correctly
+
+  const saveConversationHistory = async (messagesToSave) => {
+    console.log("Saving conversation...");
+    if (!currentUser) return;
+
+    const historyCollectionRef = collection(db, 'users', currentUser.uid, 'dreamflowHistory');
+
+    // Find the first message sent by the user to use as the title
+    const userFirstMessage = messagesToSave.find(msg => msg.sender === 'user');
+    const title = userFirstMessage ? userFirstMessage.text : 'Untitled Chat';
+
+    try {
+      await addDoc(historyCollectionRef, {
+        title: title,
+        messages: messagesToSave,
+        createdAt: serverTimestamp()
+      });
+
+      // Enforce the 20-conversation limit
+      const q = query(historyCollectionRef, orderBy('createdAt', 'asc')); // Oldest first
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.size > HISTORY_LIMIT) {
+        const conversationsToDelete = snapshot.docs.slice(0, snapshot.size - HISTORY_LIMIT);
+        const batch = writeBatch(db);
+        conversationsToDelete.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+      }
+    } catch (error) {
+      console.error("Error saving conversation history:", error);
+    }
+  };
+  
+  // Effect to auto-scroll
   useEffect(() => {
     if (messageAreaRef.current) {
       messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
@@ -54,24 +134,19 @@ function DreamFlowPage() {
   }, []);
 
   const handleSendMessage = useCallback(async (userInput) => {
+    // This function remains the same as in your original file
     if (!userInput.trim()) return;
-
     if (!hasStartedConversation) {
       setHasStartedConversation(true);
       setMessages([]); 
     }
-
     const userMessage = { id: uuidv4(), sender: 'user', text: userInput };
     setMessages(prev => [...prev, userMessage]);
-    
     setIsThinking(true);
     setIsLoading(true);
-
     const botMessagePlaceholder = { id: uuidv4(), sender: 'bot', text: '' };
-
     const onChunkReceived = (chunk) => {
       if (isThinking) setIsThinking(false);
-
       setMessages(prev => {
         const messageExists = prev.some(msg => msg.id === botMessagePlaceholder.id);
         if (!messageExists) {
@@ -84,26 +159,22 @@ function DreamFlowPage() {
         );
       });
     };
-
     const onStreamEnd = () => {
       setIsLoading(false);
       setIsThinking(false);
     };
-    
     const onError = (error) => {
       console.error("Streaming Error:", error);
       const errorMessage = {
-        id: botMessagePlaceholder.id,
-        sender: 'bot',
-        text: "I apologize, but I encountered a temporary issue. Please try again!"
+        id: botMessagePlaceholder.id, sender: 'bot', text: "I apologize, but I encountered a temporary issue. Please try again!"
       };
       setMessages(prev => [...prev.filter(msg => msg.id !== userMessage.id), userMessage, errorMessage]);
       onStreamEnd();
     };
-
     streamBotResponse(userInput, sessionId, onChunkReceived, onError, onStreamEnd);
   }, [sessionId, hasStartedConversation, isThinking]);
   
+  // The entire JSX return statement from your file is correct and remains unchanged.
   return (
     <div className="dreamflow-app">
       {showWelcomeScreen ? (
