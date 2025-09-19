@@ -1,28 +1,26 @@
 // src/pages/settingsections/HistoryPage.jsx
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { db } from '../../firebase';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import './HistoryPage.css';
 
 const HistoryItem = ({ conversation }) => {
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
   const timestamp = conversation.createdAt?.toDate();
   const formattedDate = timestamp ? timestamp.toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric'
   }) : 'No date';
 
   const handleHistoryClick = () => {
-    // Navigate to the DreamFlow page and pass the messages array in the state
+    // This sends the user to the dashboard and passes the history data in the 'state'
     navigate('/dashboard', { state: { loadHistory: conversation.messages, from: 'history' } });
   };
 
   return (
-    // UPDATED: This div now handles navigation
     <div className="history-item" onClick={handleHistoryClick}>
       <div className="history-item-header">
-        {/* UPDATED: Display the saved title */}
         <span>{conversation.title}</span>
         <span className="history-date">{formattedDate}</span>
       </div>
@@ -31,12 +29,11 @@ const HistoryItem = ({ conversation }) => {
 };
 
 export default function HistoryPage({ currentUser }) {
-  const [history, setHistory] =  useState([]);
+  const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!currentUser) return;
-
     const fetchHistory = async () => {
       setIsLoading(true);
       try {
@@ -51,13 +48,10 @@ export default function HistoryPage({ currentUser }) {
         setIsLoading(false);
       }
     };
-
     fetchHistory();
   }, [currentUser]);
 
-  if (isLoading) {
-    return <p>Loading conversation history...</p>;
-  }
+  if (isLoading) { return <p>Loading conversation history...</p>; }
 
   return (
     <div className="history-page-container">

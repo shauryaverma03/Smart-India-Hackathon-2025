@@ -1,41 +1,48 @@
 // src/pages/DreamFlowPage.jsx
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { streamBotResponse } from '../services/counselorService';
 import MessageList from '../components/MessageList.jsx';
 import MessageInput from '../components/MessageInput.jsx';
-import { db, auth } from '../firebase'; // Import Firebase
+import { db, auth } from '../firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, addDoc, query, orderBy, getDocs, writeBatch, serverTimestamp } from 'firebase/firestore';
 import './DreamFlowPage.css';
 
 const HISTORY_LIMIT = 20;
 
-function DreamFlowPage() {
+export default function DreamFlowPage() {
+  // --- 1. HOOKS AND STATE SETUP ---
   const location = useLocation();
-  const historicalChat = location.state?.loadHistory;
+  const navigate = useNavigate();
 
-  const [messages, setMessages] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [sessionId, setSessionId] = useState('');
-  const [showWelcomeScreen, setShowWelcomeScreen] = useState(!historicalChat); // Don't show welcome if loading history
-  const [isThinking, setIsThinking] = useState(false);
-  const [welcomeAnimationComplete, setWelcomeAnimationComplete] = useState(false);
-  const [hasStartedConversation, setHasStartedConversation] = useState(!!historicalChat);
   const [currentUser, setCurrentUser] = useState(null);
-
+  const [messages, setMessages] = useState([]);
+  const [sessionId, setSessionId] = useState('');
+  
+  // UI State
+  const [isLoading, setIsLoading] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(true);
+  const [welcomeAnimationComplete, setWelcomeAnimationComplete] = useState(false);
+  
+  // Refs for DOM elements and for stable data across re-renders
   const logoRef = useRef(null);
   const messageAreaRef = useRef(null);
-  const messagesRef = useRef(messages); // Ref to hold the latest messages for saving
+  const loadedChatRef = useRef(null);
+  const messagesToSaveRef = useRef(messages);
+  const isInitialized = useRef(false); // Prevents initialization from running twice
 
-  // Update the ref whenever messages change
+  // --- 2. LIFECYCLE EFFECTS ---
+
+  // Keep a ref to the latest messages for the save function
   useEffect(() => {
-    messagesRef.current = messages;
+    messagesToSaveRef.current = messages;
   }, [messages]);
 
-  // Effect to get the current user
+  // Listen for user authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
@@ -43,16 +50,24 @@ function DreamFlowPage() {
     return () => unsubscribe();
   }, []);
 
-  // Main setup effect for session, animations, and loading history
+  // Main effect for initialization: runs only ONCE when the component mounts
   useEffect(() => {
+    if (isInitialized.current) return; // Ensure this runs only once
+    isInitialized.current = true;
+
     setSessionId(uuidv4());
+    const historicalChat = location.state?.loadHistory;
 
     if (historicalChat) {
-      // If we are loading a historical chat, set the messages and skip welcome screen
+      // If we are loading a historical chat:
       setMessages(historicalChat);
+      loadedChatRef.current = historicalChat; // Mark that we loaded a chat
       setShowWelcomeScreen(false);
-    } else if (showWelcomeScreen) {
-      // Otherwise, run the welcome animation
+      // Immediately clear the state from navigation so it doesn't re-trigger
+      navigate(location.pathname, { replace: true, state: {} });
+    } else {
+      // If starting a new chat, run the welcome animation
+      setShowWelcomeScreen(true);
       const animationSequence = async () => {
         await new Promise(resolve => setTimeout(resolve, 500));
         if (logoRef.current) {
@@ -63,30 +78,37 @@ function DreamFlowPage() {
       };
       animationSequence();
     }
-  }, [showWelcomeScreen, historicalChat]);
+  }, [location, navigate]);
 
-  // --- ADDED: useEffect to save conversation history on unmount ---
+  // Effect to save conversation history when the user navigates away
   useEffect(() => {
-    return () => {
-      const currentMessages = messagesRef.current;
-      // Only save if there's a user and the conversation has more than just the initial bot message
-      if (currentUser && currentMessages.length > 1) {
-        // Check if it's a new conversation or a continued one
-        const isNewInteraction = !historicalChat || currentMessages.length > historicalChat.length;
-        if (isNewInteraction) {
-          saveConversationHistory(currentMessages);
-        }
+    return () => { // This is a "cleanup" function that runs on unmount
+      const currentMessages = messagesToSaveRef.current;
+      if (!currentUser || currentMessages.length <= 1) {
+        return;
+      }
+      
+      const originalLoadedChat = loadedChatRef.current;
+      const hasNewMessages = !originalLoadedChat || currentMessages.length > originalLoadedChat.length;
+      
+      if (hasNewMessages) {
+        saveConversationHistory(currentMessages);
       }
     };
-  }, [currentUser, historicalChat]); // Depend on user and historicalChat to set up the cleanup correctly
+  }, [currentUser]); // The setup depends only on having a logged-in user
+
+  // Effect to auto-scroll to the latest message
+  useEffect(() => {
+    if (messageAreaRef.current) {
+      messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
+    }
+  }, [messages, isThinking]);
+
+  // --- 3. CORE FUNCTIONS ---
 
   const saveConversationHistory = async (messagesToSave) => {
-    console.log("Saving conversation...");
-    if (!currentUser) return;
-
+    console.log("Saving conversation as a single entry...");
     const historyCollectionRef = collection(db, 'users', currentUser.uid, 'dreamflowHistory');
-
-    // Find the first message sent by the user to use as the title
     const userFirstMessage = messagesToSave.find(msg => msg.sender === 'user');
     const title = userFirstMessage ? userFirstMessage.text : 'Untitled Chat';
 
@@ -96,11 +118,9 @@ function DreamFlowPage() {
         messages: messagesToSave,
         createdAt: serverTimestamp()
       });
-
       // Enforce the 20-conversation limit
-      const q = query(historyCollectionRef, orderBy('createdAt', 'asc')); // Oldest first
+      const q = query(historyCollectionRef, orderBy('createdAt', 'asc'));
       const snapshot = await getDocs(q);
-      
       if (snapshot.size > HISTORY_LIMIT) {
         const conversationsToDelete = snapshot.docs.slice(0, snapshot.size - HISTORY_LIMIT);
         const batch = writeBatch(db);
@@ -111,40 +131,24 @@ function DreamFlowPage() {
       console.error("Error saving conversation history:", error);
     }
   };
-  
-  // Effect to auto-scroll
-  useEffect(() => {
-    if (messageAreaRef.current) {
-      messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
-    }
-  }, [messages, isThinking]);
 
   const handleStartChat = useCallback(() => {
     setShowWelcomeScreen(false);
-    setTimeout(() => {
-      setHasStartedConversation(true);
-      setMessages([
-        {
-          id: 'initial-bot-message',
-          sender: 'bot',
-          text: "🌟 Welcome to DreamFlow AI! I'm your intelligent career co-pilot. Share your skills, interests, or career goals, and let's discover your perfect career path together!"
-        }
-      ]);
-    }, 500);
+    setMessages([
+      { id: 'initial-bot-message', sender: 'bot', text: "🌟 Welcome to DreamFlow AI! I'm your intelligent career co-pilot. Share your skills, interests, or career goals, and let's discover your perfect career path together!" }
+    ]);
   }, []);
 
   const handleSendMessage = useCallback(async (userInput) => {
-    // This function remains the same as in your original file
     if (!userInput.trim()) return;
-    if (!hasStartedConversation) {
-      setHasStartedConversation(true);
-      setMessages([]); 
-    }
+
     const userMessage = { id: uuidv4(), sender: 'user', text: userInput };
     setMessages(prev => [...prev, userMessage]);
     setIsThinking(true);
     setIsLoading(true);
+    
     const botMessagePlaceholder = { id: uuidv4(), sender: 'bot', text: '' };
+
     const onChunkReceived = (chunk) => {
       if (isThinking) setIsThinking(false);
       setMessages(prev => {
@@ -159,29 +163,27 @@ function DreamFlowPage() {
         );
       });
     };
-    const onStreamEnd = () => {
-      setIsLoading(false);
-      setIsThinking(false);
-    };
+
+    const onStreamEnd = () => { setIsLoading(false); setIsThinking(false); };
+    
     const onError = (error) => {
       console.error("Streaming Error:", error);
-      const errorMessage = {
-        id: botMessagePlaceholder.id, sender: 'bot', text: "I apologize, but I encountered a temporary issue. Please try again!"
-      };
+      const errorMessage = { id: botMessagePlaceholder.id, sender: 'bot', text: "I apologize, but I encountered a temporary issue. Please try again!" };
       setMessages(prev => [...prev.filter(msg => msg.id !== userMessage.id), userMessage, errorMessage]);
       onStreamEnd();
     };
+
     streamBotResponse(userInput, sessionId, onChunkReceived, onError, onStreamEnd);
-  }, [sessionId, hasStartedConversation, isThinking]);
+  }, [sessionId, isThinking]);
   
-  // The entire JSX return statement from your file is correct and remains unchanged.
+  // --- 4. JSX RENDER ---
   return (
     <div className="dreamflow-app">
       {showWelcomeScreen ? (
         <div className="welcome-screen">
           <div className="background-animation">
             <div className="geometric-shapes">
-                {[...Array(5)].map((_, i) => <div key={i} className={`shape shape-${i + 1}`}></div>)}
+              {[...Array(5)].map((_, i) => <div key={i} className={`shape shape-${i + 1}`}></div>)}
             </div>
           </div>
           <div className="welcome-content">
@@ -252,7 +254,7 @@ function DreamFlowPage() {
               </div>
             </div>
           </div>
-          <div ref={messageAreaRef} className={`message-area ${!hasStartedConversation ? 'centered' : ''}`}>
+          <div ref={messageAreaRef} className="message-area">
             <MessageList messages={messages} />
             {isThinking && (
               <div className="typing-indicator">
@@ -273,5 +275,3 @@ function DreamFlowPage() {
     </div>
   );
 }
-
-export default DreamFlowPage;
