@@ -1,0 +1,107 @@
+.resume-builder-root {
+  max-width: 800px;
+  margin: 32px auto 0 auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px 0 rgba(62, 62, 135, 0.07);
+  padding: 2.5rem 2.5rem 2.5rem 2.5rem;
+}
+.resume-builder-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+.resume-builder-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  align-items: center;
+}
+.resume-builder-actions .save-btn,
+.resume-builder-actions .download-btn {
+  background: #377dff;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 20px;
+  font-weight: 600;
+  font-size: 1.07rem;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.resume-builder-actions .save-btn[disabled] {
+  background: #b7c7f7;
+  cursor: not-allowed;
+}
+.resume-builder-actions .download-btn {
+  background: #30bfa7;
+}
+.success-msg { color: #2dbb55; font-weight: 600; }
+.error-msg { color: #f54e42; font-weight: 600; }
+.resume-builder-form section {
+  margin-bottom: 2rem;
+}
+.resume-builder-form h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.6rem;
+  color: #232359;
+  font-weight: 600;
+}
+.resume-builder-form input,
+.resume-builder-form textarea {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.7rem;
+  padding: 7px 10px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1.1px solid #dde0e8;
+  background: #f7f9fc;
+  resize: vertical;
+}
+.resume-builder-form .list-section {
+  border-left: 3px solid #e4e7ef;
+  margin-bottom: 0.8rem;
+  padding-left: 1rem;
+  background: #f7f9fc;
+  border-radius: 6px;
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+}
+.resume-builder-form .remove-btn {
+  background: #ff5a5a;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 4px 15px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 0.1rem;
+  margin-bottom: 0.3rem;
+}
+.resume-builder-form button[type="button"] {
+  background: #377dff;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: 0.98rem;
+  margin: 6px 0 0 0;
+  cursor: pointer;
+}
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .resume-builder-form, .resume-builder-form * {
+    visibility: visible;
+  }
+  .resume-builder-root {
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+  }
+}

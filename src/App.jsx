@@ -6,6 +6,7 @@ import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import ChatPage from "./pages/ChatPage";
 import QuizPage from "./pages/QuizPage";
+import Settings from "./pages/Settings";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -21,7 +22,6 @@ function RequireQuizCompleted({ children }) {
     const checkQuiz = async () => {
       const user = auth.currentUser;
       if (!user) {
-        // Not logged in, redirect to login
         navigate("/login");
         return;
       }
@@ -38,7 +38,6 @@ function RequireQuizCompleted({ children }) {
       setLoading(false);
     };
     checkQuiz();
-    // Only check on mount, not on rerenders
     // eslint-disable-next-line
   }, []);
 
@@ -48,7 +47,6 @@ function RequireQuizCompleted({ children }) {
 
 export default function App() {
   const location = useLocation();
-  // Hide Navbar/Footer on fullscreen pages
   const fullscreenRoutes = ["/login", "/signup", "/dashboard", "/quiz"];
   const isFullscreen = fullscreenRoutes.some((r) =>
     location.pathname.startsWith(r)
@@ -56,7 +54,6 @@ export default function App() {
 
   return (
     <Routes>
-      {/* Homepage: WITH Navbar and Footer */}
       <Route
         path="/"
         element={
@@ -80,11 +77,8 @@ export default function App() {
           </>
         }
       />
-      {/* Login page: FULLSCREEN, NO Navbar/Footer */}
       <Route path="/login" element={<LoginPage />} />
-      {/* Signup page: FULLSCREEN, NO Navbar/Footer */}
       <Route path="/signup" element={<AuthPage type="signup" />} />
-      {/* Dashboard page: Require quiz completed */}
       <Route
         path="/dashboard"
         element={
@@ -93,7 +87,6 @@ export default function App() {
           </RequireQuizCompleted>
         }
       />
-      {/* ChatPage: Require quiz completed */}
       <Route
         path="/chat/:chatId"
         element={
@@ -102,7 +95,14 @@ export default function App() {
           </RequireQuizCompleted>
         }
       />
-      {/* QuizPage: FULLSCREEN, NO Navbar/Footer */}
+      <Route
+        path="/settings"
+        element={
+          <RequireQuizCompleted>
+            <Settings />
+          </RequireQuizCompleted>
+        }
+      />
       <Route path="/quiz" element={<QuizPage />} />
     </Routes>
   );
