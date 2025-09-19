@@ -8,6 +8,7 @@ import DreamFlowPage from "./DreamFlowPage";
 import ResumeAnalyserPage from "./ResumeAnalyserPage";
 import ResumeBuilder from "./ResumeBuilder";
 import Settings from "./Settings";
+import EventsPage from "./EventsPage";
 import { collection, collectionGroup, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import {
@@ -184,6 +185,9 @@ export default function Dashboard() {
     }
     if (activeIndex === 8) {
       return <ResumeBuilder />;
+    }
+    if (activeIndex === 7) {
+      return <EventsPage />;
     }
 
     switch (activeIndex) {
