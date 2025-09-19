@@ -4,7 +4,7 @@ import NotificationsPage from "./NotificationsPage";
 import MessagesPage from "./MessagesPage";
 import DreamFlowPage from "./DreamFlowPage";
 import ResumeAnalyserPage from "./ResumeAnalyserPage";
-import ResumeBuilder from "./ResumeBuilder"; // <-- import ResumeBuilder
+import ResumeBuilder from "./ResumeBuilder";
 import Settings from "./Settings";
 import { collection, collectionGroup, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
@@ -120,6 +120,7 @@ export default function Dashboard() {
     setActiveIndex(idx);
     setSidebarOpen(false);
 
+    // Optional: Update the URL for settings tab
     if (SIDEBAR_MENU[idx].name === "Settings") {
       navigate("/dashboard?tab=settings");
     } else {

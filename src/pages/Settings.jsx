@@ -1,294 +1,483 @@
-import React, { useEffect, useState, useRef } from "react";
-import { auth, db } from "../firebase";
-import { signOut, updateProfile } from "firebase/auth";
+import React, { useState, useEffect } from "react";
+import {
+  MdArrowBack,
+  MdSettings,
+  MdNotifications,
+  MdPerson,
+  MdApps,
+  MdDataUsage,
+  MdAccountBox,
+  MdLogout,
+} from "react-icons/md";
+import { db, auth } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { signOut } from "firebase/auth";
 import "./Settings.css";
+import { quizQuestions } from "../quizData";
+import { useNavigate } from "react-router-dom";
 
-export default function Settings({ currentUser }) {
-  const [profile, setProfile] = useState({
-    displayName: "",
-    email: "",
-    photoURL: "",
-    bio: "",
-    location: "",
-    phone: "",
-    linkedin: "",
-    github: "",
-  });
-  const [initialProfile, setInitialProfile] = useState(null);
-  const [editMode, setEditMode] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
+const SECTIONS = [
+  { key: "general", label: "General", icon: <MdSettings /> },
+  { key: "notifications", label: "Notifications", icon: <MdNotifications /> },
+  { key: "personalization", label: "Personalization", icon: <MdPerson /> },
+  { key: "connected-apps", label: "Connected Apps", icon: <MdApps /> },
+  { key: "data-controls", label: "Quiz Answers", icon: <MdDataUsage /> },
+  { key: "account", label: "Account", icon: <MdAccountBox /> },
+];
 
-  // Load user info from Firebase Auth & Firestore
+// --- Section Components ---
+function GeneralSection({ userData, onSave, loading }) {
+  const [language, setLanguage] = useState(userData.language || "en");
+  const [timezone, setTimezone] = useState(userData.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+  const handleSave = async () => {
+    await onSave({ language, timezone });
+  };
+
+  return (
+    <div>
+      <h2>General Settings</h2>
+      <div className="settings-field">
+        <label>Language</label>
+        <select value={language} onChange={e => setLanguage(e.target.value)}>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <div className="settings-field">
+        <label>Time Zone</label>
+        <select value={timezone} onChange={e => setTimezone(e.target.value)}>
+          <option value="Asia/Kolkata">India Standard Time (IST)</option>
+          <option value="UTC">Coordinated Universal Time (UTC)</option>
+        </select>
+      </div>
+      <button disabled={loading} onClick={handleSave}>Save</button>
+    </div>
+  );
+}
+
+function NotificationsSection({ userData, onSave, loading }) {
+  const [emailUpdates, setEmailUpdates] = useState(userData.emailUpdates ?? true);
+  const [messageNotify, setMessageNotify] = useState(userData.messageNotify ?? true);
+  const [communityAlerts, setCommunityAlerts] = useState(userData.communityAlerts ?? false);
+
+  const handleSave = async () => {
+    await onSave({ emailUpdates, messageNotify, communityAlerts });
+  };
+
+  return (
+    <div>
+      <h2>Notifications</h2>
+      <div className="settings-field">
+        <label>
+          <input type="checkbox" checked={emailUpdates} onChange={e => setEmailUpdates(e.target.checked)} />
+          Email me about important updates
+        </label>
+      </div>
+      <div className="settings-field">
+        <label>
+          <input type="checkbox" checked={messageNotify} onChange={e => setMessageNotify(e.target.checked)} />
+          Notify me about new messages
+        </label>
+      </div>
+      <div className="settings-field">
+        <label>
+          <input type="checkbox" checked={communityAlerts} onChange={e => setCommunityAlerts(e.target.checked)} />
+          Community & job alerts
+        </label>
+      </div>
+      <button disabled={loading} onClick={handleSave}>Save</button>
+    </div>
+  );
+}
+
+function PersonalizationSection({ userData, onSave, loading }) {
+  const [bio, setBio] = useState(userData.bio || "");
+  const [skills, setSkills] = useState(userData.skills || "");
+
+  const handleSave = async () => {
+    await onSave({ bio, skills });
+  };
+
+  return (
+    <div>
+      <h2>Personalization</h2>
+      <div className="settings-field">
+        <label>Bio</label>
+        <input
+          type="text"
+          placeholder="Write a short bio..."
+          value={bio}
+          onChange={e => setBio(e.target.value)}
+        />
+      </div>
+      <div className="settings-field">
+        <label>Your Skills</label>
+        <input
+          type="text"
+          placeholder="e.g. React, Python, Communication"
+          value={skills}
+          onChange={e => setSkills(e.target.value)}
+        />
+      </div>
+      <button disabled={loading} onClick={handleSave}>Save</button>
+    </div>
+  );
+}
+
+function ConnectedAppsSection({ userData, onSave, loading }) {
+  const [linkedin, setLinkedin] = useState(userData.linkedin || "");
+  const [github, setGithub] = useState(userData.github || "");
+
+  const handleSave = async () => {
+    await onSave({ linkedin, github });
+  };
+
+  return (
+    <div>
+      <h2>Connected Apps</h2>
+      <div className="settings-field">
+        <label>LinkedIn Profile URL</label>
+        <input
+          type="url"
+          placeholder="https://linkedin.com/in/your-profile"
+          value={linkedin}
+          onChange={e => setLinkedin(e.target.value)}
+        />
+      </div>
+      <div className="settings-field">
+        <label>GitHub Profile URL</label>
+        <input
+          type="url"
+          placeholder="https://github.com/yourusername"
+          value={github}
+          onChange={e => setGithub(e.target.value)}
+        />
+      </div>
+      <button disabled={loading} onClick={handleSave}>Save</button>
+    </div>
+  );
+}
+
+// --- Main Quiz Section, using shared quizQuestions structure ---
+function QuizAnswersSection({ userData, onSave, loading }) {
+  // Firestore format: quizAnswers: { q1: ..., q2: ..., ... }
+  const storedAnswers = userData.quizAnswers || {};
+
+  // Build local state in the same format as QuizPage's `answers` array
+  const [answers, setAnswers] = useState(
+    quizQuestions.map((q, i) => {
+      const ans = storedAnswers[`q${i + 1}`];
+      if (q.type === "multi") return Array.isArray(ans) ? ans : [];
+      if (q.type === "text") return ans || "";
+      return typeof ans === "string" ? ans : "";
+    })
+  );
+
   useEffect(() => {
-    async function fetchProfile() {
-      if (!currentUser) return;
-      const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-      const data = userDoc.exists() ? userDoc.data() : {};
-      const combined = {
-        displayName: currentUser.displayName || "",
-        email: currentUser.email || "",
-        photoURL: currentUser.photoURL || "/avatar-placeholder.png",
-        bio: data.bio || "",
-        location: data.location || "",
-        phone: data.phone || "",
-        linkedin: data.linkedin || "",
-        github: data.github || "",
-      };
-      setProfile(combined);
-      setInitialProfile(combined);
-    }
-    fetchProfile();
-  }, [currentUser]);
-
-  // Check for unsaved changes
-  function hasChanges() {
-    if (!initialProfile) return false;
-    return Object.keys(profile).some(
-      (k) => profile[k] !== (initialProfile[k] || "")
+    setAnswers(
+      quizQuestions.map((q, i) => {
+        const ans = storedAnswers[`q${i + 1}`];
+        if (q.type === "multi") return Array.isArray(ans) ? ans : [];
+        if (q.type === "text") return ans || "";
+        return typeof ans === "string" ? ans : "";
+      })
     );
-  }
+    // eslint-disable-next-line
+  }, [userData.quizAnswers]);
 
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setProfile((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    setSuccess("");
-    setError("");
-  }
+  const handleSingleSelect = (idx, value) => {
+    setAnswers((prev) => {
+      const n = [...prev];
+      n[idx] = value;
+      return n;
+    });
+  };
 
-  async function handleSave(e) {
-    if (e) e.preventDefault();
-    setSaving(true);
-    setError("");
-    setSuccess("");
+  const handleMultiSelect = (idx, option, max) => {
+    setAnswers((prev) => {
+      const old = prev[idx] || [];
+      let next;
+      if (old.includes(option)) {
+        next = old.filter((v) => v !== option);
+      } else {
+        if (old.length >= max) return prev;
+        next = [...old, option];
+      }
+      const n = [...prev];
+      n[idx] = next;
+      return n;
+    });
+  };
+
+  const handleTextChange = (idx, value) => {
+    setAnswers((prev) => {
+      const n = [...prev];
+      n[idx] = value;
+      return n;
+    });
+  };
+
+  const handleSave = async () => {
+    const answersObj = {};
+    quizQuestions.forEach((q, i) => {
+      answersObj[`q${i + 1}`] = answers[i];
+    });
+    await onSave({ quizAnswers: answersObj });
+  };
+
+  return (
+    <div>
+      <h2>Your Quiz Answers</h2>
+      <div className="quiz-answers-list">
+        {quizQuestions.map((q, idx) => (
+          <div className="settings-field" key={q.question}>
+            <label>{q.question}</label>
+            {q.type === "single" && (
+              <select
+                value={answers[idx]}
+                onChange={e => handleSingleSelect(idx, e.target.value)}
+              >
+                <option value="">Select an option</option>
+                {q.options.map((option, i) => (
+                  <option value={option} key={i}>{option}</option>
+                ))}
+              </select>
+            )}
+            {q.type === "multi" && (
+              <div className="quiz-checkbox-group">
+                {q.options.map((option, i) => (
+                  <label key={i} style={{marginRight: 16}}>
+                    <input
+                      type="checkbox"
+                      checked={(answers[idx] || []).includes(option)}
+                      onChange={() => handleMultiSelect(idx, option, q.max || 99)}
+                      disabled={
+                        !(answers[idx] || []).includes(option) &&
+                        (answers[idx] || []).length >= (q.max || 99)
+                      }
+                    />
+                    {option}
+                  </label>
+                ))}
+                {q.helper && (
+                  <div className="quiz-multi-helper" style={{fontSize:12,color:"#888"}}>{q.helper}</div>
+                )}
+              </div>
+            )}
+            {q.type === "text" && (
+              <textarea
+                value={answers[idx]}
+                onChange={e => handleTextChange(idx, e.target.value)}
+                placeholder={q.placeholder || "Your answer"}
+                rows={3}
+                style={{
+                  width: "100%",
+                  borderRadius: 8,
+                  border: "1.5px solid #dbeafe",
+                  fontSize: "1rem",
+                  padding: "10px 12px",
+                  marginBottom: 14,
+                  marginTop: 2,
+                  background: "#f8fafc",
+                }}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+      <button disabled={loading} onClick={handleSave}>Save</button>
+    </div>
+  );
+}
+
+function AccountSection({ userData, onSave, loading }) {
+  const [displayName, setDisplayName] = useState(userData.displayName || "");
+  const [email] = useState(userData.email || "");
+
+  const handleSave = async () => {
+    await onSave({ displayName });
+  };
+
+  return (
+    <div>
+      <h2>Account Info</h2>
+      <div className="settings-field">
+        <label>Name</label>
+        <input
+          type="text"
+          value={displayName}
+          onChange={e => setDisplayName(e.target.value)}
+        />
+      </div>
+      <div className="settings-field">
+        <label>Email</label>
+        <input type="email" value={email} disabled />
+      </div>
+      <button disabled={loading} onClick={handleSave}>Save</button>
+    </div>
+  );
+}
+
+// --- Main Settings Page ---
+export default function Settings({ currentUser }) {
+  const [selected, setSelected] = useState(null);
+  const [userData, setUserData] = useState(currentUser || {});
+  const [loading, setLoading] = useState(false);
+  const user = currentUser;
+  const navigate = useNavigate();
+
+  // Fetch user data from Firestore
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user) return;
+      const userRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userRef);
+      if (snap.exists()) {
+        setUserData({
+          ...snap.data(),
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+        });
+      } else {
+        setUserData({
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+        });
+      }
+    };
+    fetchUserData();
+    // eslint-disable-next-line
+  }, [user]);
+
+  // Save section data to Firestore (only the intended fields!)
+  const handleSectionSave = async (data) => {
+    if (!user) return;
+    setLoading(true);
     try {
-      // Update Firebase Auth (displayName, photoURL)
-      await updateProfile(auth.currentUser, {
-        displayName: profile.displayName,
-        photoURL: profile.photoURL,
-      });
-      // Update Firestore
-      await setDoc(
-        doc(db, "users", currentUser.uid),
-        {
-          bio: profile.bio,
-          location: profile.location,
-          phone: profile.phone,
-          linkedin: profile.linkedin,
-          github: profile.github,
-        },
-        { merge: true }
-      );
-      setInitialProfile({ ...profile });
-      setEditMode(false);
-      setSuccess("Profile updated successfully!");
-    } catch (err) {
-      setError("Error updating profile. Please try again.");
+      const userRef = doc(db, "users", user.uid);
+      await setDoc(userRef, data, { merge: true });
+      setUserData((prev) => ({ ...prev, ...data }));
+      alert("Saved!");
+    } catch (e) {
+      alert("Error saving data: " + e.message);
     }
-    setSaving(false);
+    setLoading(false);
+  };
+
+  // Logout function
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      await signOut(auth);
+      setLoading(false);
+      navigate("/login");
+    } catch (e) {
+      setLoading(false);
+      alert("Error logging out: " + e.message);
+    }
+  };
+
+  let SectionComponent = null;
+  switch (selected) {
+    case "general":
+      SectionComponent = (
+        <GeneralSection userData={userData} onSave={handleSectionSave} loading={loading} />
+      );
+      break;
+    case "notifications":
+      SectionComponent = (
+        <NotificationsSection userData={userData} onSave={handleSectionSave} loading={loading} />
+      );
+      break;
+    case "personalization":
+      SectionComponent = (
+        <PersonalizationSection userData={userData} onSave={handleSectionSave} loading={loading} />
+      );
+      break;
+    case "connected-apps":
+      SectionComponent = (
+        <ConnectedAppsSection userData={userData} onSave={handleSectionSave} loading={loading} />
+      );
+      break;
+    case "data-controls":
+      SectionComponent = (
+        <QuizAnswersSection userData={userData} onSave={handleSectionSave} loading={loading} />
+      );
+      break;
+    case "account":
+      SectionComponent = (
+        <AccountSection userData={userData} onSave={handleSectionSave} loading={loading} />
+      );
+      break;
+    default:
+      SectionComponent = null;
   }
 
-  function handleEdit() {
-    setEditMode(true);
-    setSuccess("");
-    setError("");
-  }
-
-  function handleCancel() {
-    setProfile({ ...initialProfile });
-    setEditMode(false);
-    setSuccess("");
-    setError("");
-  }
-
-  async function handleSignOut() {
-    await signOut(auth);
-    window.location.href = "/login";
-  }
-
-  // Floating save button for UX
-  function FloatingSave() {
-    if (!editMode || !hasChanges()) return null;
-    return (
-      <button
-        className="floating-save-btn"
-        onClick={handleSave}
-        disabled={saving}
-        type="button"
-      >
-        {saving ? "Saving..." : "Save Changes"}
-      </button>
-    );
+  // Helper for user initials if no photo
+  function getInitial(name, email) {
+    if (name && name.length > 0) return name[0].toUpperCase();
+    if (email && email.length > 0) return email[0].toUpperCase();
+    return "?";
   }
 
   return (
-    <div className="settings-container">
-      <h2 className="settings-title">Settings</h2>
-      <form
-        className="settings-form"
-        onSubmit={handleSave}
-        autoComplete="off"
-      >
-        <section className="settings-section">
-          <h3>Profile</h3>
-          <div className="settings-profile-row">
-            <img
-              src={profile.photoURL || "/avatar-placeholder.png"}
-              alt="Profile"
-              className="settings-avatar"
-            />
-            {editMode && (
-              <div className="settings-profile-fields">
-                <label>
-                  Photo URL
-                  <input
-                    type="text"
-                    name="photoURL"
-                    value={profile.photoURL}
-                    onChange={handleChange}
-                    disabled={saving}
-                    placeholder="Paste image url"
-                  />
-                  <span className="settings-profile-tip">
-                    Tip: Use a direct image URL (from Google, GitHub, etc.)
-                  </span>
-                </label>
+    <div className="slide-settings-root">
+      <div className={`settings-slider ${selected ? "show-details" : ""}`}>
+        {/* MENU PANEL */}
+        <div className="settings-menu-panel">
+          <div className="settings-profile-centered">
+            {userData.photoURL ? (
+              <img
+                src={userData.photoURL}
+                alt="Profile"
+                className="settings-profile-photo-lg"
+                onError={e => {
+                  e.target.onerror = null;
+                  e.target.src = "/avatar-placeholder.png";
+                }}
+              />
+            ) : (
+              <div className="settings-profile-photo-lg settings-profile-initials">
+                {getInitial(userData.displayName, userData.email)}
               </div>
             )}
+            <div className="settings-profile-name-lg">{userData.displayName || "Your Name"}</div>
+            <div className="settings-profile-email-lg">{userData.email || "your@email.com"}</div>
           </div>
-          <div className="settings-profile-fields">
-            <label>
-              Name
-              <input
-                type="text"
-                name="displayName"
-                value={profile.displayName}
-                onChange={handleChange}
-                disabled={!editMode || saving}
-                required
-                autoFocus={editMode}
-              />
-            </label>
-            <label>
-              Email
-              <input
-                type="email"
-                name="email"
-                value={profile.email}
-                disabled
-              />
-            </label>
-            <label>
-              Short Bio
-              <textarea
-                name="bio"
-                value={profile.bio}
-                onChange={handleChange}
-                disabled={!editMode || saving}
-                placeholder="Tell us something about yourself..."
-              />
-            </label>
+          <div className="settings-menu-list">
+            {SECTIONS.map((item) => (
+              <button
+                key={item.key}
+                className="settings-menu-list-btn"
+                onClick={() => setSelected(item.key)}
+              >
+                <span className="settings-menu-list-icon">{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
           </div>
-          <div className="settings-profile-grid">
-            <label>
-              Location
-              <input
-                type="text"
-                name="location"
-                value={profile.location}
-                onChange={handleChange}
-                disabled={!editMode || saving}
-                placeholder="City, Country"
-              />
-            </label>
-            <label>
-              Phone
-              <input
-                type="text"
-                name="phone"
-                value={profile.phone}
-                onChange={handleChange}
-                disabled={!editMode || saving}
-                placeholder="Phone number"
-              />
-            </label>
-          </div>
-          <div className="settings-profile-grid">
-            <label>
-              LinkedIn
-              <input
-                type="text"
-                name="linkedin"
-                value={profile.linkedin}
-                onChange={handleChange}
-                disabled={!editMode || saving}
-                placeholder="LinkedIn profile url"
-              />
-            </label>
-            <label>
-              GitHub
-              <input
-                type="text"
-                name="github"
-                value={profile.github}
-                onChange={handleChange}
-                disabled={!editMode || saving}
-                placeholder="GitHub profile url"
-              />
-            </label>
-          </div>
-        </section>
-
-        <section className="settings-section">
-          <h3>Account</h3>
-          <button
-            type="button"
-            className="signout-btn"
-            onClick={handleSignOut}
-            disabled={saving}
-          >
-            Sign Out
-          </button>
-        </section>
-
-        <div className="settings-actions">
-          {!editMode ? (
+          {/* Add the logout button at the bottom */}
+          <div className="settings-logout-row">
             <button
-              type="button"
-              className="edit-btn"
-              onClick={handleEdit}
-              disabled={saving}
+              className="settings-logout-btn"
+              onClick={handleLogout}
+              disabled={loading}
             >
-              Edit Profile
+              <MdLogout style={{marginRight: 6, verticalAlign: "middle"}} />
+              Logout
             </button>
-          ) : (
-            <>
-              <button
-                type="submit"
-                className="save-btn"
-                disabled={saving || !hasChanges()}
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
-              <button
-                type="button"
-                className="cancel-btn"
-                onClick={handleCancel}
-                disabled={saving}
-              >
-                Cancel
-              </button>
-            </>
-          )}
+          </div>
         </div>
-        {success && <div className="settings-success">{success}</div>}
-        {error && <div className="settings-error">{error}</div>}
-      </form>
+        {/* DETAILS PANEL */}
+        <div className="settings-details-panel">
+          <button className="settings-back-btn" onClick={() => setSelected(null)}>
+            <MdArrowBack size={28} />
+          </button>
+          <div className="settings-details-content">{SectionComponent}</div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,39 @@
+.account-section-block {
+  background: #f7f9fd;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px 0 rgba(55, 125, 255, 0.02);
+}
+
+.account-section-label {
+  color: #232359;
+  font-size: 1.06rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.account-section-value {
+  display: flex;
+  align-items: center;
+  color: #377dff;
+  font-size: 1.08rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.account-link-btn {
+  background: #fff;
+  border: 1px solid #e0e7f7;
+  color: #377dff;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.13s, border 0.13s;
+}
+.account-link-btn:hover {
+  background: #eaf3fe;
+  border-color: #377dff;
+}
