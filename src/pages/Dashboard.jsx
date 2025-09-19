@@ -61,6 +61,7 @@ export default function Dashboard() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [connectionRequestCount, setConnectionRequestCount] = useState(0);  // New state for connection requests
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
@@ -93,14 +94,27 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user) {
       setNotificationCount(0);
+      setConnectionRequestCount(0);
       return;
     }
+    // Listen for unread generic notifications
     const notificationsRef = collection(db, "notifications");
     const q = query(notificationsRef, where("userId", "==", user.uid), where("isRead", "==", false));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       setNotificationCount(querySnapshot.size);
     });
-    return () => unsubscribe();
+
+    // Listen for pending connection requests where user is mentor
+    const requestsRef = collection(db, "connectionRequests");
+    const reqQuery = query(requestsRef, where("mentorId", "==", user.uid), where("status", "==", "pending"));
+    const unsubscribeRequests = onSnapshot(reqQuery, (querySnapshot) => {
+      setConnectionRequestCount(querySnapshot.size);
+    });
+
+    return () => {
+      unsubscribe();
+      unsubscribeRequests();
+    };
   }, [user]);
 
   useEffect(() => {
@@ -200,8 +214,12 @@ export default function Dashboard() {
             >
               <span className={`dashboard-menu-icon${activeIndex === idx ? " active" : ""}`}>
                 {item.icon}
-                {item.name === "Notifications" && notificationCount > 0 && (<span className="notification-badge">{notificationCount}</span>)}
-                {item.name === "Messages" && unreadMessageCount > 0 && (<span className="notification-badge">{unreadMessageCount}</span>)}
+                {(item.name === "Notifications" && (notificationCount + connectionRequestCount) > 0) && (
+                  <span className="notification-badge">{notificationCount + connectionRequestCount}</span>
+                )}
+                {item.name === "Messages" && unreadMessageCount > 0 && (
+                  <span className="notification-badge">{unreadMessageCount}</span>
+                )}
               </span>
               <span className={`dashboard-menu-label${activeIndex === idx ? " active" : ""}`}>{item.name}</span>
             </button>

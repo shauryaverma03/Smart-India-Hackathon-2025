@@ -1,31 +1,35 @@
-import React, { useState } from 'react'; // 1. Import React and useState
+// src/components/MessageInput.jsx
+import React, { useState } from 'react';
+import './MessageInput.css';
+import { MdSend } from 'react-icons/md';
 
-// The component takes the onSend function as a prop from DreamFlowPage
-function MessageInput({ onSend }) {
-  const [input, setInput] = useState('');
+function MessageInput({ onSendMessage, disabled }) {
+  const [inputValue, setInputValue] = useState('');
 
-  // This function handles the form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (input.trim()) {
-      onSend(input);
-      setInput('');
+    if (inputValue.trim() && !disabled) {
+      onSendMessage(inputValue);
+      setInputValue('');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="message-input-form">
+    <form className="message-input-form" onSubmit={handleSubmit}>
       <input
         type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
+        className="message-input"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
         placeholder="Ask a career question..."
+        disabled={disabled}
+        aria-label="Chat input"
       />
-      <button type="submit" disabled={!input.trim()}>
-        Send
+      <button type="submit" className="send-button" disabled={disabled || !inputValue.trim()}>
+        <MdSend />
       </button>
     </form>
   );
 }
 
-export default MessageInput; // 2. Export the component so it can be imported elsewhere
+export default MessageInput;

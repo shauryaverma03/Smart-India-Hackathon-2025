@@ -27,14 +27,12 @@ export default function LoginPage() {
     setTimeout(() => setShow(true), 20);
   }, []);
 
-  // Reusable notification function
   const showNotificationWithMessage = (message, duration = 5000) => {
     setNotificationMessage(message);
     setShowNotification(true);
     setTimeout(() => setShowNotification(false), duration);
   };
 
-  // Helper: Redirect based on quizCompleted status
   const redirectAfterAuth = async (user) => {
     if (!user) {
       showNotificationWithMessage("User authentication failed.");
@@ -44,7 +42,6 @@ export default function LoginPage() {
       const docRef = doc(db, "users", user.uid);
       const snap = await getDoc(docRef);
       if (!snap.exists()) {
-        // If user doc doesn't exist (rare), create it
         await setDoc(docRef, {
           email: user.email,
           displayName: user.displayName || "",
@@ -60,7 +57,7 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error("Error checking quiz status", err);
-      navigate("/quiz"); // default to quiz on error
+      navigate("/quiz");
     }
   };
 
@@ -69,7 +66,6 @@ export default function LoginPage() {
     try {
       const userCredential = await signInWithPopup(auth, provider);
       const user = userCredential.user;
-      // Ensure Firestore user doc is created if doesn't exist
       const userDocRef = doc(db, "users", user.uid);
       const snap = await getDoc(userDocRef);
       if (!snap.exists()) {
@@ -97,7 +93,6 @@ export default function LoginPage() {
     }
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // Same logic as Google login: ensure user doc exists
       const user = userCredential.user;
       const userDocRef = doc(db, "users", user.uid);
       const snap = await getDoc(userDocRef);
@@ -198,9 +193,10 @@ export default function LoginPage() {
                 </button>
               </div>
               <div className="auth-login-row">
-                <a href="#" className="auth-login-forgot-link" onClick={(e) => { e.preventDefault(); setView('forgotPassword'); }}>
+                {/* --- CORRECTED ELEMENT #1 --- */}
+                <button type="button" className="auth-login-forgot-link" onClick={() => setView('forgotPassword')}>
                   Forgot your password?
-                </a>
+                </button>
               </div>
               <button className="auth-login-continue-btn" onClick={handleEmailSignIn}>Continue</button>
               <p className="auth-login-signup-link">
@@ -224,9 +220,10 @@ export default function LoginPage() {
                 Send Reset Link
               </button>
               <p className="auth-login-signup-link">
-                <a href="#" className="auth-login-forgot-link" onClick={(e) => { e.preventDefault(); setView('login'); }}>
+                 {/* --- CORRECTED ELEMENT #2 --- */}
+                <button type="button" className="auth-login-forgot-link" onClick={() => setView('login')}>
                   ← Back to Login
-                </a>
+                </button>
               </p>
             </>
           )}

@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import './MentorCard.css';
 import { db } from '../firebase';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { collection, doc, addDoc, query, where, getDocs, writeBatch, serverTimestamp } from 'firebase/firestore';
 
 export default function MentorCard({ mentor, currentUser }) {
-  // Add 'pending' and 'accepted' to the list of possible statuses
   const [requestStatus, setRequestStatus] = useState('idle'); // idle, loading, pending, accepted
 
+  // This useEffect hook correctly checks if a request already exists. No changes needed here.
   useEffect(() => {
     if (!currentUser || !mentor || !mentor.uid) return;
 
     const requestsRef = collection(db, "connectionRequests");
-    // --- FIX: The query now correctly checks for the mentor's Login ID (uid) ---
     const q = query(requestsRef, 
       where("menteeId", "==", currentUser.uid),
       where("mentorId", "==", mentor.uid)
@@ -19,13 +18,13 @@ export default function MentorCard({ mentor, currentUser }) {
 
     getDocs(q).then(querySnapshot => {
       if (!querySnapshot.empty) {
-        // A request exists, so we get its status ('pending' or 'accepted')
         const requestData = querySnapshot.docs[0].data();
         setRequestStatus(requestData.status);
       }
     });
   }, [currentUser, mentor]);
 
+  // THIS FUNCTION IS NOW CORRECTED
   const handleConnect = async () => {
     if (!currentUser) {
       alert("Please log in to connect with mentors.");
@@ -34,15 +33,34 @@ export default function MentorCard({ mentor, currentUser }) {
 
     setRequestStatus('loading');
     try {
-      await addDoc(collection(db, "connectionRequests"), {
+      // Use a batch to perform multiple writes at once
+      const batch = writeBatch(db);
+
+      // 1. Create the connection request document
+      const requestRef = doc(collection(db, "connectionRequests"));
+      batch.set(requestRef, {
         menteeId: currentUser.uid,
         menteeName: currentUser.displayName || currentUser.email,
         mentorId: mentor.uid,
         mentorName: mentor.fullName,
-        status: 'pending', // A new request is always 'pending'
-        createdAt: new Date()
+        status: 'pending',
+        createdAt: serverTimestamp()
       });
-      setRequestStatus('pending'); // Update status to 'pending' after sending
+
+      // 2. THIS IS THE FIX: Create the notification document FOR THE MENTOR
+      const notificationRef = doc(collection(db, "notifications"));
+      batch.set(notificationRef, {
+        userId: mentor.uid, // <-- Notifies the MENTOR
+        message: `${currentUser.displayName || "A new mentee"} would like to connect with you.`,
+        isRead: false,
+        createdAt: serverTimestamp()
+      });
+      
+      // Commit both writes to the database
+      await batch.commit();
+
+      setRequestStatus('pending'); // Update button status after sending
+      
     } catch (error) {
       console.error("Error sending connection request: ", error);
       alert("Failed to send connection request. Please try again.");
@@ -50,19 +68,17 @@ export default function MentorCard({ mentor, currentUser }) {
     }
   };
 
+  // This helper function is correct. No changes needed.
   const getButtonText = () => {
     switch(requestStatus) {
-      case 'loading':
-        return 'Sending...';
-      case 'pending':
-        return 'Request Sent';
-      case 'accepted':
-        return 'Connected'; // <-- FIX: Added this new state
-      default:
-        return 'Connect';
+      case 'loading': return 'Sending...';
+      case 'pending': return 'Request Sent';
+      case 'accepted': return 'Connected';
+      default: return 'Connect';
     }
   };
 
+  // The JSX is correct. No changes needed.
   return (
     <div className="mentor-card">
       <div className="mentor-card-header">
