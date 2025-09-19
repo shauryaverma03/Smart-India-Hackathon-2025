@@ -9,6 +9,8 @@ import ResumeAnalyserPage from "./ResumeAnalyserPage";
 import ResumeBuilder from "./ResumeBuilder";
 import Settings from "./Settings";
 import EventsPage from "./EventsPage";
+import CommunityPage from "./CommunityPage";
+import JobsPage from "./JobsPage"; // <-- Add this import
 import { collection, collectionGroup, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import {
@@ -47,6 +49,15 @@ function getInitial(name, email) {
   return "?";
 }
 
+<<<<<<< HEAD
+=======
+function getTabFromQuery(location) {
+  const params = new URLSearchParams(location.search);
+  if (params.get("tab") === "settings") return 9;
+  return null;
+}
+
+>>>>>>> Added Jobs and Community page and edited loading
 export default function Dashboard() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -102,6 +113,10 @@ export default function Dashboard() {
   function handleSidebarSelect(idx) {
     setActiveIndex(idx);
     setSidebarOpen(false);
+<<<<<<< HEAD
+=======
+
+>>>>>>> Added Jobs and Community page and edited loading
     if (SIDEBAR_MENU[idx].name === "Settings") {
       navigate("/dashboard?tab=settings");
     } else {
@@ -128,6 +143,7 @@ export default function Dashboard() {
       );
     }
 
+<<<<<<< HEAD
     const PageNotBuilt = () => (
       <div className="dashboard-center">
         <div className="dashboard-card dashboard-community-card fade-in">
@@ -148,6 +164,30 @@ export default function Dashboard() {
       case "Resume Builder": return <ResumeBuilder />;
       case "Resume Analyser": return <ResumeAnalyserPage currentUser={user} />;
       case "Settings": return <Settings currentUser={user} />;
+=======
+    if (activeIndex === 9) {
+      return <Settings currentUser={user} />;
+    }
+    if (activeIndex === 7) {
+      return <ResumeBuilder />;
+    }
+    if (activeIndex === 6) {
+      return <EventsPage />;
+    }
+    if (activeIndex === 2) {
+      return <CommunityPage />;
+    }
+    if (activeIndex === 1) {
+      return <JobsPage />; // <-- Show JobsPage for Jobs tab
+    }
+
+    switch (activeIndex) {
+      case 0: return <PeoplePage userName={userName || userEmail} currentUser={user} />;
+      case 3: return <DreamFlowPage currentUser={user} />;
+      case 4: return <NotificationsPage currentUser={user} />;
+      case 5: return <MessagesPage currentUser={user} />;
+      case 8: return <ResumeAnalyserPage currentUser={user} />;
+>>>>>>> Added Jobs and Community page and edited loading
       default:
         return <PageNotBuilt />;
     }
