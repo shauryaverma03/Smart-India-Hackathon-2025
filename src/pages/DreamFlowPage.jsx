@@ -8,41 +8,33 @@ import MessageList from '../components/MessageList.jsx';
 import MessageInput from '../components/MessageInput.jsx';
 import { db, auth } from '../firebase';
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, addDoc, query, orderBy, getDocs, writeBatch, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, query, orderBy, getDocs, writeBatch, serverTimestamp } from 'firebase/firestore';
 import './DreamFlowPage.css';
 
 const HISTORY_LIMIT = 20;
 
 export default function DreamFlowPage() {
-  // --- 1. HOOKS AND STATE SETUP ---
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [currentUser, setCurrentUser] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
   const [sessionId, setSessionId] = useState('');
-  
-  // UI State
-  const [isLoading, setIsLoading] = useState(false);
-  const [isThinking, setIsThinking] = useState(false);
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(true);
+  const [isThinking, setIsThinking] = useState(false);
   const [welcomeAnimationComplete, setWelcomeAnimationComplete] = useState(false);
-  
-  // Refs for DOM elements and for stable data across re-renders
+  const [isLoading, setIsLoading] = useState(false);
+
+  const historyDocIdRef = useRef(null); // Ref to hold the ID of the loaded chat
+  const messagesToSaveRef = useRef(messages);
+  const isInitialized = useRef(false);
   const logoRef = useRef(null);
   const messageAreaRef = useRef(null);
-  const loadedChatRef = useRef(null);
-  const messagesToSaveRef = useRef(messages);
-  const isInitialized = useRef(false); // Prevents initialization from running twice
 
-  // --- 2. LIFECYCLE EFFECTS ---
-
-  // Keep a ref to the latest messages for the save function
   useEffect(() => {
     messagesToSaveRef.current = messages;
   }, [messages]);
 
-  // Listen for user authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
@@ -50,29 +42,23 @@ export default function DreamFlowPage() {
     return () => unsubscribe();
   }, []);
 
-  // Main effect for initialization: runs only ONCE when the component mounts
   useEffect(() => {
-    if (isInitialized.current) return; // Ensure this runs only once
+    if (isInitialized.current) return;
     isInitialized.current = true;
 
     setSessionId(uuidv4());
-    const historicalChat = location.state?.loadHistory;
+    const historicalConversation = location.state?.loadHistory;
 
-    if (historicalChat) {
-      // If we are loading a historical chat:
-      setMessages(historicalChat);
-      loadedChatRef.current = historicalChat; // Mark that we loaded a chat
+    if (historicalConversation) {
+      setMessages(historicalConversation.messages);
+      historyDocIdRef.current = historicalConversation.id; // Store the document ID
       setShowWelcomeScreen(false);
-      // Immediately clear the state from navigation so it doesn't re-trigger
       navigate(location.pathname, { replace: true, state: {} });
     } else {
-      // If starting a new chat, run the welcome animation
       setShowWelcomeScreen(true);
       const animationSequence = async () => {
         await new Promise(resolve => setTimeout(resolve, 500));
-        if (logoRef.current) {
-          logoRef.current.classList.add('logo-entrance');
-        }
+        if (logoRef.current) logoRef.current.classList.add('logo-entrance');
         await new Promise(resolve => setTimeout(resolve, 2000));
         setWelcomeAnimationComplete(true);
       };
@@ -80,57 +66,63 @@ export default function DreamFlowPage() {
     }
   }, [location, navigate]);
 
-  // Effect to save conversation history when the user navigates away
   useEffect(() => {
-    return () => { // This is a "cleanup" function that runs on unmount
+    return () => {
       const currentMessages = messagesToSaveRef.current;
-      if (!currentUser || currentMessages.length <= 1) {
-        return;
-      }
+      const docIdToUpdate = historyDocIdRef.current;
+      if (!currentUser || currentMessages.length <= 1) return;
       
-      const originalLoadedChat = loadedChatRef.current;
-      const hasNewMessages = !originalLoadedChat || currentMessages.length > originalLoadedChat.length;
-      
-      if (hasNewMessages) {
-        saveConversationHistory(currentMessages);
+      // Save only if it's a new chat (no docId) or a continued chat with new messages
+      if (!docIdToUpdate || (docIdToUpdate && currentMessages.length > 0)) {
+         saveConversationHistory(currentMessages, docIdToUpdate);
       }
     };
-  }, [currentUser]); // The setup depends only on having a logged-in user
+  }, [currentUser]);
 
-  // Effect to auto-scroll to the latest message
+  const saveConversationHistory = async (messagesToSave, docIdToUpdate) => {
+    if (!currentUser) return;
+    const historyCollectionRef = collection(db, 'users', currentUser.uid, 'dreamflowHistory');
+
+    if (docIdToUpdate) {
+      console.log("Updating existing conversation:", docIdToUpdate);
+      const docRef = doc(historyCollectionRef, docIdToUpdate);
+      try {
+        await updateDoc(docRef, {
+          messages: messagesToSave,
+          updatedAt: serverTimestamp()
+        });
+      } catch (error) {
+        console.error("Error updating conversation:", error);
+      }
+    } else {
+      console.log("Saving new conversation...");
+      const userFirstMessage = messagesToSave.find(msg => msg.sender === 'user');
+      const title = userFirstMessage ? userFirstMessage.text : 'Untitled Chat';
+      try {
+        await addDoc(historyCollectionRef, {
+          title: title,
+          messages: messagesToSave,
+          createdAt: serverTimestamp()
+        });
+        const q = query(historyCollectionRef, orderBy('createdAt', 'asc'));
+        const snapshot = await getDocs(q);
+        if (snapshot.size > HISTORY_LIMIT) {
+          const conversationsToDelete = snapshot.docs.slice(0, snapshot.size - HISTORY_LIMIT);
+          const batch = writeBatch(db);
+          conversationsToDelete.forEach(doc => batch.delete(doc.ref));
+          await batch.commit();
+        }
+      } catch (error) {
+        console.error("Error saving new conversation:", error);
+      }
+    }
+  };
+  
   useEffect(() => {
     if (messageAreaRef.current) {
       messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
     }
   }, [messages, isThinking]);
-
-  // --- 3. CORE FUNCTIONS ---
-
-  const saveConversationHistory = async (messagesToSave) => {
-    console.log("Saving conversation as a single entry...");
-    const historyCollectionRef = collection(db, 'users', currentUser.uid, 'dreamflowHistory');
-    const userFirstMessage = messagesToSave.find(msg => msg.sender === 'user');
-    const title = userFirstMessage ? userFirstMessage.text : 'Untitled Chat';
-
-    try {
-      await addDoc(historyCollectionRef, {
-        title: title,
-        messages: messagesToSave,
-        createdAt: serverTimestamp()
-      });
-      // Enforce the 20-conversation limit
-      const q = query(historyCollectionRef, orderBy('createdAt', 'asc'));
-      const snapshot = await getDocs(q);
-      if (snapshot.size > HISTORY_LIMIT) {
-        const conversationsToDelete = snapshot.docs.slice(0, snapshot.size - HISTORY_LIMIT);
-        const batch = writeBatch(db);
-        conversationsToDelete.forEach(doc => batch.delete(doc.ref));
-        await batch.commit();
-      }
-    } catch (error) {
-      console.error("Error saving conversation history:", error);
-    }
-  };
 
   const handleStartChat = useCallback(() => {
     setShowWelcomeScreen(false);
@@ -141,14 +133,11 @@ export default function DreamFlowPage() {
 
   const handleSendMessage = useCallback(async (userInput) => {
     if (!userInput.trim()) return;
-
     const userMessage = { id: uuidv4(), sender: 'user', text: userInput };
     setMessages(prev => [...prev, userMessage]);
     setIsThinking(true);
     setIsLoading(true);
-    
     const botMessagePlaceholder = { id: uuidv4(), sender: 'bot', text: '' };
-
     const onChunkReceived = (chunk) => {
       if (isThinking) setIsThinking(false);
       setMessages(prev => {
@@ -157,26 +146,20 @@ export default function DreamFlowPage() {
           return [...prev, { ...botMessagePlaceholder, text: chunk }];
         }
         return prev.map(msg =>
-          msg.id === botMessagePlaceholder.id
-            ? { ...msg, text: msg.text + chunk }
-            : msg
+          msg.id === botMessagePlaceholder.id ? { ...msg, text: msg.text + chunk } : msg
         );
       });
     };
-
     const onStreamEnd = () => { setIsLoading(false); setIsThinking(false); };
-    
     const onError = (error) => {
       console.error("Streaming Error:", error);
       const errorMessage = { id: botMessagePlaceholder.id, sender: 'bot', text: "I apologize, but I encountered a temporary issue. Please try again!" };
       setMessages(prev => [...prev.filter(msg => msg.id !== userMessage.id), userMessage, errorMessage]);
       onStreamEnd();
     };
-
     streamBotResponse(userInput, sessionId, onChunkReceived, onError, onStreamEnd);
   }, [sessionId, isThinking]);
   
-  // --- 4. JSX RENDER ---
   return (
     <div className="dreamflow-app">
       {showWelcomeScreen ? (

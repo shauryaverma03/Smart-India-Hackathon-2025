@@ -1,6 +1,5 @@
 // src/pages/settingsections/HistoryPage.jsx
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../../firebase';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
@@ -14,8 +13,9 @@ const HistoryItem = ({ conversation }) => {
   }) : 'No date';
 
   const handleHistoryClick = () => {
-    // This sends the user to the dashboard and passes the history data in the 'state'
-    navigate('/dashboard', { state: { loadHistory: conversation.messages, from: 'history' } });
+    // --- CHANGE IS HERE ---
+    // We now pass the ENTIRE conversation object, which includes its unique ID.
+    navigate('/dashboard', { state: { loadHistory: conversation, from: 'history' } });
   };
 
   return (
