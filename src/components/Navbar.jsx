@@ -105,7 +105,7 @@ export default function Navbar() {
           <>
             <a href="/login" className="wf-nav-link">Log in</a>
             <a href="/signup" className="wf-nav-link">Sign up</a>
-            <a href="/career-test" className="wf-nav-btn">Get started — it's free</a>
+            <a href="/signup" className="wf-nav-btn">Get started — it's free</a>
           </>
         ) : (
           <div className="wf-nav-profile-container" ref={profileMenuRef}>
