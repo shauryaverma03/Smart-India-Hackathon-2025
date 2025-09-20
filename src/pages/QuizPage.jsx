@@ -280,6 +280,18 @@ await setDoc(doc(db, "users", user.uid), {
 
   const progress = Math.round(((current + 1) / quizQuestions.length) * 100);
 
+  // Add skip handler
+  const handleSkip = () => {
+    const newAnswers = [...answers];
+    if (quizQuestions[current].type === "multi") {
+      newAnswers[current] = [];
+    } else {
+      newAnswers[current] = "";
+    }
+    setAnswers(newAnswers);
+    handleNext();
+  };
+
   if (submitted) {
     return (
       <div className="quiz-bg">
@@ -387,6 +399,16 @@ await setDoc(doc(db, "users", user.uid), {
             >
               Previous
             </button>
+            {/* Add Skip button except for 10th question (index 9) */}
+            {current !== 9 && (
+              <button
+                className="quiz-btn quiz-btn-skip"
+                onClick={handleSkip}
+                style={{marginRight: 8}}
+              >
+                Skip
+              </button>
+            )}
             {current < quizQuestions.length - 1 ? (
               <button
                 className="quiz-btn"
