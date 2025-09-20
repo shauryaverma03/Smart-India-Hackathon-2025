@@ -7,13 +7,15 @@ import Dashboard from "./pages/Dashboard";
 import ChatPage from "./pages/ChatPage";
 import QuizPage from "./pages/QuizPage";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile"; // Make sure this file exists!
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
-import LoadingScreen from "./components/LoadingScreen"; // <-- Import here
-import "./HomePage.css";
+import LoadingScreen from "./components/LoadingScreen";
+import "./App.css"; // Use your App CSS
+import "./HomePage.css"; // And your HomePage CSS if you use it
 
-// Route guard for dashboard and chat (add more as needed)
+// Route guard for dashboard, chat, settings, and profile (add more as needed)
 function RequireQuizCompleted({ children }) {
   const [loading, setLoading] = useState(true);
   const [allow, setAllow] = useState(false);
@@ -41,7 +43,7 @@ function RequireQuizCompleted({ children }) {
     return () => unsubscribe();
   }, [navigate]);
 
-  if (loading) return <LoadingScreen />; // <-- Use the new component here
+  if (loading) return <LoadingScreen />;
   return allow ? children : null;
 }
 
@@ -67,7 +69,7 @@ export default function App() {
                   perfect career path
                 </h1>
                 <p className="hero-subtext">
-                  With our AI-powered platform, you can explore, analyze, and optimize your career journey. 
+                  With our AI-powered platform, you can explore, analyze, and optimize your career journey.
                   Get personalized guidance, skill gap analysis, and curated resources—built just for Indian students.
                 </p>
                 <a href="/signup" className="hero-btn">Start building</a>
@@ -100,6 +102,14 @@ export default function App() {
         element={
           <RequireQuizCompleted>
             <Settings />
+          </RequireQuizCompleted>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <RequireQuizCompleted>
+            <Profile />
           </RequireQuizCompleted>
         }
       />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaChevronDown, FaTimes, FaUser, FaCog, FaSignOutAlt } from "react-icons/fa";
+import { FaChevronDown, FaTimes, FaUser, FaCog, FaSignOutAlt, FaTachometerAlt } from "react-icons/fa";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import "./Navbar.css";
@@ -60,14 +60,19 @@ export default function Navbar() {
     setShowProfileMenu((prev) => !prev);
   }
 
-  function handleViewProfile() {
+  function handleDashboard() {
     setShowProfileMenu(false);
     navigate("/dashboard");
   }
 
+  function handleViewProfile() {
+    setShowProfileMenu(false);
+    navigate("/profile");
+  }
+
   function handleSettings() {
     setShowProfileMenu(false);
-    navigate("/settings");
+    navigate("/dashboard?tab=settings");
   }
 
   function handleLogout() {
@@ -125,6 +130,9 @@ export default function Navbar() {
             </div>
             {showProfileMenu && (
               <div className="wf-nav-profile-menu">
+                <button className="wf-nav-profile-menu-item" onClick={handleDashboard}>
+                  <FaTachometerAlt style={{marginRight:8}} /> Dashboard
+                </button>
                 <button className="wf-nav-profile-menu-item" onClick={handleViewProfile}>
                   <FaUser style={{marginRight:8}} /> View Profile
                 </button>
@@ -221,6 +229,9 @@ export default function Navbar() {
                   )}
                   <span style={{fontSize: "1.09rem"}}>{userName || userEmail}</span>
                 </div>
+                <button className="wf-navbar-mobile-footer-menu-btn" onClick={handleDashboard}>
+                  <FaTachometerAlt style={{marginRight:8}} /> Dashboard
+                </button>
                 <button className="wf-navbar-mobile-footer-menu-btn" onClick={handleViewProfile}>
                   <FaUser style={{marginRight:8}} /> View Profile
                 </button>
