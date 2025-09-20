@@ -20,6 +20,22 @@ import "./Settings.css";
 import { quizQuestions } from "../quizData";
 import HistoryPage from './settingsSections/HistoryPage'; // --- 1. IMPORT HISTORY PAGE ---
 
+// --- Notification Toast Component ---
+function SettingsToast({ message, show, onClose }) {
+  useEffect(() => {
+    if (show) {
+      const timeout = setTimeout(onClose, 2200);
+      return () => clearTimeout(timeout);
+    }
+  }, [show, onClose]);
+  if (!show) return null;
+  return (
+    <div className="settings-toast">
+      <span>{message}</span>
+    </div>
+  );
+}
+
 // --- 2. ADD HISTORY TO THE MENU ---
 const SECTIONS = [
   { key: "general", label: "General", icon: <MdSettings /> },
@@ -328,6 +344,7 @@ export default function Settings({ currentUser }) {
   const [selected, setSelected] = useState(null);
   const [userData, setUserData] = useState(currentUser || {});
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "" }); // <--- Add toast state
   const user = currentUser;
   const navigate = useNavigate();
 
@@ -354,9 +371,9 @@ export default function Settings({ currentUser }) {
       const userRef = doc(db, "users", user.uid);
       await setDoc(userRef, data, { merge: true });
       setUserData((prev) => ({ ...prev, ...data }));
-      alert("Saved!");
+      setToast({ show: true, message: "Saved!" }); // <--- Show toast on success
     } catch (e) {
-      alert("Error saving data: " + e.message);
+      setToast({ show: true, message: "Error saving data: " + e.message });
     }
     setLoading(false);
   };
@@ -370,7 +387,7 @@ export default function Settings({ currentUser }) {
       navigate("/login");
     } catch (e) {
       setLoading(false);
-      alert("Error logging out: " + e.message);
+      setToast({ show: true, message: "Error logging out: " + e.message });
     }
   };
 
@@ -410,6 +427,7 @@ export default function Settings({ currentUser }) {
 
   return (
     <div className="slide-settings-root">
+      <SettingsToast message={toast.message} show={toast.show} onClose={() => setToast({ show: false, message: "" })} />
       <div className={`settings-slider ${selected ? "show-details" : ""}`}>
         {/* MENU PANEL (remains unchanged) */}
         <div className="settings-menu-panel">

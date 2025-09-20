@@ -393,3 +393,28 @@
     padding: 20px 8px 16px 8px;
   }
 }
+
+/* ...your previous styles... */
+
+.settings-toast {
+  position: fixed;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: linear-gradient(90deg, #377dff 60%, #2046c7 100%);
+  color: #fff;
+  padding: 14px 32px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: 0 6px 28px 0 rgba(56, 100, 255, 0.19);
+  animation: settings-toast-fadein 0.32s cubic-bezier(.9, .1, .2, 1);
+  opacity: 0.98;
+  pointer-events: none;
+}
+
+@keyframes settings-toast-fadein {
+  from { opacity: 0; transform: translateX(-50%) translateY(-30px);}
+  to   { opacity: 0.98; transform: translateX(-50%) translateY(0);}
+}
