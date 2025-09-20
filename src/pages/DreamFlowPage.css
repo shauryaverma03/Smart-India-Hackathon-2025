@@ -439,3 +439,9 @@ body {
     margin: 0;
   }
 }
+.user-message, .bot-message, .message-bubble {
+  display: flex;
+  flex-direction: row;     /* Prevents vertical letter stacking */
+  align-items: center;
+  white-space: pre-line;   /* Ensures line breaks work normally, but no vertical stacking */
+}

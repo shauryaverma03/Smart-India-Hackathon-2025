@@ -1,11 +1,103 @@
-import React, { useState } from "react";
-import { MdGridView, MdViewList, MdWorkOutline } from "react-icons/md";
+import React, { useState, useEffect } from "react";
+import { MdGridView, MdViewList, MdWorkOutline, MdLocationOn, MdBusiness } from "react-icons/md";
+import "./JobsPage.css"; // Import the CSS file
 
 const JOB_CATEGORIES = ["All Jobs", "Internship", "Full-time", "Part-time", "Remote"];
+const BACKEND_URL = "https://job-backend-production-945e.up.railway.app";
 
 export default function JobsPage() {
+  // State for UI controls
   const [selectedCategory, setSelectedCategory] = useState(0);
   const [viewMode, setViewMode] = useState("list");
+  
+  // State for handling data, loading, and errors
+  const [jobs, setJobs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Effect to fetch data when the selected category changes
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setIsLoading(true);
+      setError(null);
+      setJobs([]); // Clear previous jobs
+
+      let query = JOB_CATEGORIES[selectedCategory];
+      if (query === "All Jobs") {
+        query = "Software Developer jobs in India"; // A good default query
+      } else {
+        query = `${query} jobs in India`;
+      }
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/jobs?query=${encodeURIComponent(query)}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        setJobs(data || []); // Ensure data is an array to prevent errors
+      } catch (e) {
+        console.error("Failed to fetch jobs:", e);
+        setError("Failed to load job opportunities. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, [selectedCategory]); // Re-run the effect when the selectedCategory changes
+
+  // Helper function to render the main content area
+  const renderJobContent = () => {
+    if (isLoading) {
+      return <div className="jobs-loading-state">Loading job opportunities...</div>;
+    }
+
+    if (error) {
+      return <div className="jobs-error-state">{error}</div>;
+    }
+    
+    if (jobs.length === 0) {
+      return (
+        <div className="jobs-empty-state">
+          <span className="jobs-empty-icon"><MdWorkOutline /></span>
+          <div className="jobs-empty-title">No Jobs Found</div>
+          <div className="jobs-empty-desc">
+            There are no job openings for this category at the moment. Please check back later.
+          </div>
+        </div>
+      );
+    }
+    
+    // Renders the list of jobs
+    return (
+      <div className={`jobs-list-container ${viewMode}`}>
+        {jobs.map((job) => (
+          <div key={job.job_id} className="job-item-card">
+            <div className="job-item-logo-wrapper">
+              <img 
+                src={job.employer_logo || 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/2048px-No_image_available.svg.png'} 
+                alt={`${job.employer_name} logo`} 
+                className="job-item-logo" 
+              />
+            </div>
+            <div className="job-item-details">
+              <h3 className="job-item-title">{job.job_title}</h3>
+              <div className="job-item-company">
+                <MdBusiness /> {job.employer_name}
+              </div>
+              <div className="job-item-location">
+                <MdLocationOn /> {job.job_city || 'N/A'}, {job.job_country}
+              </div>
+            </div>
+            <a href={job.job_apply_link} target="_blank" rel="noopener noreferrer" className="job-item-apply-btn">
+              Apply
+            </a>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="jobs-container">
@@ -14,7 +106,9 @@ export default function JobsPage() {
         <div className="jobs-header">
           <div>
             <div className="jobs-title">Jobs</div>
-            <div className="jobs-count">0 jobs available</div>
+            <div className="jobs-count">
+              {isLoading ? 'Searching...' : `${jobs.length} jobs available`}
+            </div>
           </div>
           <div className="jobs-view-toggle">
             <button
@@ -40,163 +134,16 @@ export default function JobsPage() {
               key={category}
               className={`jobs-category-btn ${selectedCategory === idx ? "selected" : ""}`}
               onClick={() => setSelectedCategory(idx)}
+              disabled={isLoading}
             >
               {category}
             </button>
           ))}
         </div>
-        {/* Jobs Empty State */}
-        <div className="jobs-empty-state">
-          <span className="jobs-empty-icon">
-            <MdWorkOutline />
-          </span>
-          <div className="jobs-empty-title">Jobs coming soon</div>
-          <div className="jobs-empty-desc">
-            We're preparing exciting job opportunities for you. Check back soon for updates.
-          </div>
-        </div>
+        
+        {/* Dynamic Job Content Area */}
+        {renderJobContent()}
       </div>
-      <style>{`
-        .jobs-container {
-          width: 100%;
-          min-height: 78vh;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding-top: 30px;
-          background: none;
-        }
-        .jobs-card {
-          width: 100%;
-          max-width: 820px;
-          background: #fff;
-          border-radius: 2.2rem;
-          box-shadow: 0 2.5px 24px 0 #e9ecf7;
-          padding: 44px 36px 44px 36px;
-          margin: 0 auto 44px auto;
-          min-height: 440px;
-          display: flex;
-          flex-direction: column;
-          position: relative;
-          animation: jobsPopIn 0.85s cubic-bezier(.23,1.23,.32,1);
-        }
-        @keyframes jobsPopIn {
-          0% { transform: scale(0.96) translateY(35px); opacity: 0; }
-          75% { transform: scale(1.02) translateY(-6px); opacity: 1; }
-          100% { transform: scale(1) translateY(0); opacity: 1; }
-        }
-        .jobs-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 16px;
-        }
-        .jobs-title {
-          font-size: 2.3rem;
-          font-weight: 400;
-          color: #232942;
-          letter-spacing: -1px;
-          margin-bottom: 0;
-          font-family: inherit;
-          line-height: 1.1;
-        }
-        .jobs-count {
-          font-size: 1.08rem;
-          color: #b6bcd6;
-          font-weight: 400;
-          margin-top: 2px;
-          font-family: inherit;
-        }
-        .jobs-view-toggle {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-        .jobs-view-btn {
-          background: transparent;
-          border: none;
-          border-radius: 8px;
-          padding: 7px 12px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          color: #bcc2d4;
-          font-size: 22px;
-          transition: background 0.14s, color 0.14s, transform 0.13s;
-        }
-        .jobs-view-btn.active {
-          background: #222548;
-          color: #fff;
-          box-shadow: 0 1px 5px #e1e6f9;
-          transform: scale(1.07);
-        }
-        .jobs-categories {
-          display: flex;
-          gap: 12px;
-          margin-bottom: 34px;
-          flex-wrap: wrap;
-        }
-        .jobs-category-btn {
-          font-weight: 400;
-          font-size: 1.08rem;
-          padding: 7px 20px;
-          border-radius: 8px;
-          border: 1.5px solid #e4e8f7;
-          background: #fff;
-          color: #232942;
-          cursor: pointer;
-          transition: all 0.15s;
-          margin-bottom: 4px;
-          font-family: inherit;
-        }
-        .jobs-category-btn.selected {
-          background: #232942;
-          color: #fff;
-          border-color: #232942;
-          box-shadow: 0 2px 8px #e9ecf7;
-          transform: scale(1.06);
-        }
-        .jobs-empty-state {
-          margin-top: 68px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-        .jobs-empty-icon {
-          color: #e4e8f7;
-          font-size: 55px;
-          margin-bottom: 6px;
-          animation: jobsIconBounce 1.5s infinite alternate cubic-bezier(0.65,0,0.35,1);
-        }
-        @keyframes jobsIconBounce {
-          0% { transform: translateY(0);}
-          100% { transform: translateY(-8px);}
-        }
-        .jobs-empty-title {
-          font-weight: 600;
-          font-size: 1.32rem;
-          color: #232847;
-          margin-bottom: 4px;
-          font-family: inherit;
-        }
-        .jobs-empty-desc {
-          color: #b6bcd6;
-          font-size: 1.06rem;
-          font-weight: 400;
-          text-align: center;
-          max-width: 340px;
-          font-family: inherit;
-        }
-        @media (max-width: 600px) {
-          .jobs-card {
-            padding: 26px 8vw 32px 8vw;
-            min-height: 360px;
-          }
-          .jobs-title {
-            font-size: 1.3rem;
-          }
-        }
-      `}</style>
     </div>
   );
 }
