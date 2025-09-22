@@ -7,15 +7,16 @@ import Dashboard from "./pages/Dashboard";
 import ChatPage from "./pages/ChatPage";
 import QuizPage from "./pages/QuizPage";
 import Settings from "./pages/Settings";
-import Profile from "./pages/Profile"; // Make sure this file exists!
+import Profile from "./pages/Profile";
+import HeroSection from "./components/HeroSection"; // ✅ New hero import
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
 import LoadingScreen from "./components/LoadingScreen";
-import "./App.css"; // Use your App CSS
-import "./HomePage.css"; // And your HomePage CSS if you use it
+import "./App.css";
+import "./HomePage.css";
 
-// Route guard for dashboard, chat, settings, and profile (add more as needed)
+// Route guard for dashboard, chat, settings, and profile
 function RequireQuizCompleted({ children }) {
   const [loading, setLoading] = useState(true);
   const [allow, setAllow] = useState(false);
@@ -56,29 +57,9 @@ export default function App() {
 
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <>
-            <Navbar />
-            <main className="main-hero">
-              <section className="hero-content">
-                <div className="hero-overline">MORE THAN AN AI CAREER ADVISOR</div>
-                <h1 className="hero-heading">
-                  Discover your<br />
-                  perfect career path
-                </h1>
-                <p className="hero-subtext">
-                  With our AI-powered platform, you can explore, analyze, and optimize your career journey.
-                  Get personalized guidance, skill gap analysis, and curated resources—built just for Indian students.
-                </p>
-                <a href="/signup" className="hero-btn">Start building</a>
-              </section>
-            </main>
-            <Footer />
-          </>
-        }
-      />
+      {/* ✅ Updated home route with HeroSection */}
+      <Route path="/" element={<HeroSection />} />
+
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<AuthPage type="signup" />} />
       <Route

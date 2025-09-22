@@ -1,11 +1,6 @@
 import React from "react";
-import {
-  FaLinkedin,
-  FaTwitter,
-  FaInstagram,
-  FaGithub,
-} from "react-icons/fa";
-import { motion } from "framer-motion"; // Import Framer Motion
+import { FaLinkedin, FaTwitter, FaInstagram, FaGithub } from "react-icons/fa";
+import { motion } from "framer-motion";
 import "./Footer.css";
 
 export default function Footer() {
@@ -17,18 +12,41 @@ export default function Footer() {
       transition={{ duration: 1.1, delay: 0.7 }}
     >
       <div className="footer-main">
-        <div className="footer-col footer-logo">
-          <span className="footer-logo-text"><b>CareerFlow</b></span>
+        {/* Left corner */}
+        <div className="footer-col footer-left">
+          <span className="footer-logo-text">
+            <b>CareerFlow</b>
+          </span>
+          <p className="footer-description">
+            Your one-stop platform for career guidance,
+            <br /> mentorship, and skill development.
+          </p>
         </div>
+
+        {/* Center */}
         <div className="footer-col footer-center">
-          <div>
-            Built with <span className="footer-heart">♥</span>
+          <div className="footer-center-text">
+            Built with <span className="footer-heart">♥</span> by passionate
+            developers
           </div>
-          <div>in India for the world</div>
+          <div>in India, for the world</div>
+          <div className="footer-cta">
+            <a href="/about">About Us</a> | <a href="/services">Services</a> |{" "}
+            <a href="/contact">Contact</a>
+          </div>
         </div>
-        <div className="footer-col footer-contact">
-          <div><b>Contact</b></div>
-          <a href="mailto:shauryaverma036@gmail.com" className="footer-contact-link">shauryaverma036@gmail.com</a>
+
+        {/* Right corner */}
+        <div className="footer-col footer-right">
+          <div>
+            <b>Contact</b>
+          </div>
+          <a
+            href="mailto:shauryaverma036@gmail.com"
+            className="footer-contact-link"
+          >
+            shauryaverma036@gmail.com
+          </a>
           <div className="footer-social">
             <motion.a
               href="https://linkedin.com/"
@@ -73,6 +91,8 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Bottom copyright */}
       <div className="footer-bottom">
         &copy; {new Date().getFullYear()} CareerFlow. All rights reserved.
       </div>
