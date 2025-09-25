@@ -1,0 +1,209 @@
+/* --- Global Styles & Variables --- */
+:root {
+  --primary-color: #007bff; /* A modern, friendly blue */
+  --primary-hover: #0056b3;
+  --background-start: #f4f7f9;
+  --background-end: #e9edf2;
+  --card-background: #ffffff;
+  --text-color: #343a40;
+  --subtle-text: #6c757d;
+  --border-color: #dee2e6;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --success-bg: #e9f7ea;
+  --success-border: #a3d9a5;
+  --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-main);
+  background: linear-gradient(
+    135deg,
+    var(--background-start),
+    var(--background-end)
+  );
+  margin: 0;
+  padding: 25px;
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* --- Typography --- */
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+h1 {
+  text-align: center;
+  font-size: 2.8rem;
+  margin-bottom: 30px;
+  color: var(--primary-color);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+h2 {
+  font-size: 1.7rem;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 10px;
+  margin-top: 0;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin-top: 0;
+}
+
+/* --- Main Layout --- */
+.app-container {
+  display: flex;
+  max-width: 1100px;
+  margin: 0 auto;
+  gap: 30px;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.tasks-side,
+.menu-side {
+  background: var(--card-background);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 8px 25px var(--shadow-color);
+  flex: 1;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tasks-side {
+  flex-basis: 60%; /* Give more space to tasks */
+}
+
+.menu-side {
+  flex-basis: 40%; /* Less space for the menu */
+}
+
+/* Add a subtle "lift" effect on hover */
+.tasks-side:hover,
+.menu-side:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* --- Menu & Buttons --- */
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+button {
+  padding: 14px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--primary-color);
+  color: white;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+}
+
+button:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+}
+
+button:active {
+  transform: translateY(0px) scale(1);
+}
+
+/* --- Form Styles --- */
+.form-container {
+  background: var(--background-start);
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 25px;
+  border: 1px solid var(--border-color);
+  animation: slideDown 0.4s ease-out; /* Note: display is handled by React */
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: var(--text-color);
+  font-size: 1rem;
+  font-family: var(--font-main);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* --- Output/Display Area --- */
+.output {
+  padding: 20px;
+  background: #f8f9fa; /* A slightly different light color */
+  border-left: 5px solid var(--primary-color);
+  border-radius: 0 8px 8px 0;
+  min-height: 200px;
+  font-family: "SF Mono", "Consolas", "Menlo", monospace;
+  white-space: pre-wrap; /* Allows text to wrap */
+  word-wrap: break-word; /* Prevents long strings from overflowing */
+  margin-top: 20px;
+  color: var(--subtle-text);
+  transition: background-color 0.3s;
+}
+
+/* --- Animations --- */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 850px) {
+  .app-container {
+    flex-direction: column;
+  }
+  h1 {
+    font-size: 2.2rem;
+  }
+}

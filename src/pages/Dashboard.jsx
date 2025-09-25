@@ -9,7 +9,8 @@ import Settings from "./Settings";
 import EventsPage from "./EventsPage";
 import CommunityPage from "./CommunityPage";
 import JobsPage from "./JobsPage";
-import CollegeFinder from "./CollegeFinderPage"; // ✅ new
+import CollegeFinder from "./CollegeFinderPage";
+import TaskReminder from "./TaskReminder"; // ✅ new import
 import {
   collection,
   collectionGroup,
@@ -30,11 +31,13 @@ import {
   MdNotifications,
   MdChat,
   MdAutoAwesome,
+  MdSchool,
 } from "react-icons/md";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Dashboard.css";
 
+// ✅ Sidebar Menu Items
 const SIDEBAR_MENU = [
   { name: "People", icon: <MdPeople /> },
   { name: "Jobs", icon: <MdWork /> },
@@ -46,9 +49,11 @@ const SIDEBAR_MENU = [
   { name: "Resume Builder", icon: <MdDescription /> },
   { name: "Resume Analyser", icon: <MdDescription /> },
   { name: "Settings", icon: <MdSettings /> },
-  { name: "College Finder", icon: <MdDescription /> }, // ✅ new
+  { name: "College Finder", icon: <MdSchool /> },
+  { name: "Task Reminder", icon: <MdDescription /> }, // ✅ new
 ];
 
+// ✅ Get initial letter for avatar
 function getInitial(name, email) {
   if (name && name.length > 0) return name[0].toUpperCase();
   if (email && email.length > 0) return email[0].toUpperCase();
@@ -72,14 +77,17 @@ export default function Dashboard() {
   const [notificationCount, setNotificationCount] = useState(0);
   const [connectionRequestCount, setConnectionRequestCount] = useState(0);
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ✅ Sync active tab with query param
   useEffect(() => {
     const idx = getTabFromQuery(location);
     if (idx !== null) setActiveIndex(idx);
   }, [location]);
 
+  // ✅ Firebase Auth Listener
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -88,9 +96,7 @@ export default function Dashboard() {
         setIsLoggedIn(true);
         setUserName(user.displayName || "");
         setUserEmail(user.email || "");
-        setUserAvatar(
-          user.photoURL && user.photoURL.trim() !== "" ? user.photoURL : ""
-        );
+        setUserAvatar(user.photoURL?.trim() !== "" ? user.photoURL : "");
       } else {
         setUser(null);
         setIsLoggedIn(false);
@@ -102,6 +108,7 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, []);
 
+  // ✅ Notifications & Connection Requests
   useEffect(() => {
     if (!user) {
       setNotificationCount(0);
@@ -134,6 +141,7 @@ export default function Dashboard() {
     };
   }, [user]);
 
+  // ✅ Unread Messages
   useEffect(() => {
     if (!user) {
       setUnreadMessageCount(0);
@@ -151,6 +159,7 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, [user]);
 
+  // ✅ Sidebar Navigation Handler
   function handleSidebarSelect(idx) {
     setActiveIndex(idx);
     setSidebarOpen(false);
@@ -174,6 +183,7 @@ export default function Dashboard() {
     navigate("/login");
   }
 
+  // ✅ Render Page Content
   function renderContent() {
     if (!isLoggedIn) {
       return (
@@ -218,7 +228,9 @@ export default function Dashboard() {
       case 9:
         return <Settings currentUser={user} />;
       case 10:
-        return <CollegeFinder />; // ✅ College Finder
+        return <CollegeFinder />;
+      case 11:
+        return <TaskReminder />; // ✅ Task Reminder Page
       default:
         return (
           <div className="dashboard-center">
@@ -235,10 +247,13 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-root">
+      {/* Overlay for Mobile */}
       <div
         className={`dashboard-sidebar-overlay${sidebarOpen ? " open" : ""}`}
         onClick={handleSidebarToggle}
       />
+
+      {/* ✅ Sidebar */}
       <aside className={`dashboard-sidebar${sidebarOpen ? " open" : ""}`}>
         <div className="dashboard-logo-row" onClick={handleLogoClick}>
           <img
@@ -255,13 +270,14 @@ export default function Dashboard() {
             <MdClose size={22} />
           </button>
         </div>
+
         <nav className="dashboard-menu">
           {SIDEBAR_MENU.map((item, idx) => (
             <button
               key={item.name}
               className={`dashboard-menu-btn ${
-                item.name === "DreamFlow AI" ? "dreamflow-menu-btn" : ""
-              } ${activeIndex === idx ? " active" : ""}`}
+                activeIndex === idx ? " active" : ""
+              }`}
               onClick={() => handleSidebarSelect(idx)}
               tabIndex={0}
               disabled={!isLoggedIn && item.name !== "People"}
@@ -272,6 +288,7 @@ export default function Dashboard() {
                 }`}
               >
                 {item.icon}
+                {/* ✅ Badge Counts */}
                 {item.name === "Notifications" &&
                   notificationCount + connectionRequestCount > 0 && (
                     <span className="notification-badge">
@@ -295,6 +312,8 @@ export default function Dashboard() {
           ))}
         </nav>
       </aside>
+
+      {/* ✅ Main Content */}
       <main className="dashboard-main">
         <header className="dashboard-header">
           <div className="dashboard-header-mobile-left">
@@ -344,6 +363,7 @@ export default function Dashboard() {
             )}
           </div>
         </header>
+
         <section className="dashboard-content-row">{renderContent()}</section>
       </main>
     </div>

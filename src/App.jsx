@@ -8,7 +8,8 @@ import ChatPage from "./pages/ChatPage";
 import QuizPage from "./pages/QuizPage";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
-import HeroSection from "./components/HeroSection"; // ✅ New hero import
+import HeroSection from "./components/HeroSection";
+import TaskReminder from "./pages/TaskReminder"; // ✅ NEW Import
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -16,7 +17,7 @@ import LoadingScreen from "./components/LoadingScreen";
 import "./App.css";
 import "./HomePage.css";
 
-// Route guard for dashboard, chat, settings, and profile
+// ✅ Route guard (unchanged)
 function RequireQuizCompleted({ children }) {
   const [loading, setLoading] = useState(true);
   const [allow, setAllow] = useState(false);
@@ -57,11 +58,14 @@ export default function App() {
 
   return (
     <Routes>
-      {/* ✅ Updated home route with HeroSection */}
+      {/* ✅ Home Route */}
       <Route path="/" element={<HeroSection />} />
 
+      {/* Auth Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<AuthPage type="signup" />} />
+
+      {/* Protected Routes */}
       <Route
         path="/dashboard"
         element={
@@ -95,6 +99,9 @@ export default function App() {
         }
       />
       <Route path="/quiz" element={<QuizPage />} />
+
+      {/* ✅ New Task Reminder Route */}
+      <Route path="/task-reminder" element={<TaskReminder />} />
     </Routes>
   );
 }
