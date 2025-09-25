@@ -445,3 +445,32 @@ body {
   align-items: center;
   white-space: pre-line;   /* Ensures line breaks work normally, but no vertical stacking */
 }
+/* --- Floating Action Button for Roadmap --- */
+.fab-roadmap {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, var(--brand-color), var(--brand-secondary));
+  color: white;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 8px 25px rgba(57, 226, 232, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fab-roadmap:hover {
+  transform: translateY(-5px) scale(1.1);
+  box-shadow: 0 15px 35px rgba(57, 226, 232, 0.6);
+}
+
+.fab-roadmap-icon {
+  width: 28px;
+  height: 28px;
+}

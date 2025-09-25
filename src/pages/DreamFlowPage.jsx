@@ -3,12 +3,24 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+
+// --- CORE APPLICATION IMPORTS ---
 import { streamBotResponse } from '../services/counselorService';
 import MessageList from '../components/MessageList.jsx';
 import MessageInput from '../components/MessageInput.jsx';
+
+// --- IMPORTS FOR ROADMAP FEATURE ---
+import Modal from '../components/Modal.jsx';
+import QuizPage from './QuizPage.jsx';
+import RoadmapDisplay from '../components/RoadmapDisplay.jsx';
+import { generateAdviceVisual } from '../utils/roadmapGenerator.js';
+
+// --- FIREBASE IMPORTS ---
 import { db, auth } from '../firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, addDoc, doc, updateDoc, query, orderBy, getDocs, writeBatch, serverTimestamp } from 'firebase/firestore';
+
+// --- STYLES ---
 import './DreamFlowPage.css';
 
 const HISTORY_LIMIT = 20;
@@ -17,6 +29,7 @@ export default function DreamFlowPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // --- STATES for chat and welcome screen ---
   const [messages, setMessages] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [sessionId, setSessionId] = useState('');
@@ -25,12 +38,18 @@ export default function DreamFlowPage() {
   const [welcomeAnimationComplete, setWelcomeAnimationComplete] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const historyDocIdRef = useRef(null); // Ref to hold the ID of the loaded chat
+  // --- STATES to manage the modals ---
+  const [modalContent, setModalContent] = useState(null); // Can be 'quiz', 'roadmap', or null
+  const [roadmapData, setRoadmapData] = useState(null);
+
+  // --- REFS ---
+  const historyDocIdRef = useRef(null);
   const messagesToSaveRef = useRef(messages);
   const isInitialized = useRef(false);
   const logoRef = useRef(null);
   const messageAreaRef = useRef(null);
 
+  // --- useEffects ---
   useEffect(() => {
     messagesToSaveRef.current = messages;
   }, [messages]);
@@ -45,13 +64,11 @@ export default function DreamFlowPage() {
   useEffect(() => {
     if (isInitialized.current) return;
     isInitialized.current = true;
-
     setSessionId(uuidv4());
     const historicalConversation = location.state?.loadHistory;
-
     if (historicalConversation) {
       setMessages(historicalConversation.messages);
-      historyDocIdRef.current = historicalConversation.id; // Store the document ID
+      historyDocIdRef.current = historicalConversation.id;
       setShowWelcomeScreen(false);
       navigate(location.pathname, { replace: true, state: {} });
     } else {
@@ -71,14 +88,19 @@ export default function DreamFlowPage() {
       const currentMessages = messagesToSaveRef.current;
       const docIdToUpdate = historyDocIdRef.current;
       if (!currentUser || currentMessages.length <= 1) return;
-      
-      // Save only if it's a new chat (no docId) or a continued chat with new messages
       if (!docIdToUpdate || (docIdToUpdate && currentMessages.length > 0)) {
          saveConversationHistory(currentMessages, docIdToUpdate);
       }
     };
   }, [currentUser]);
+  
+  useEffect(() => {
+    if (messageAreaRef.current) {
+      messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
+    }
+  }, [messages, isThinking]);
 
+  // --- HANDLER FUNCTIONS ---
   const saveConversationHistory = async (messagesToSave, docIdToUpdate) => {
     if (!currentUser) return;
     const historyCollectionRef = collection(db, 'users', currentUser.uid, 'dreamflowHistory');
@@ -118,12 +140,6 @@ export default function DreamFlowPage() {
     }
   };
   
-  useEffect(() => {
-    if (messageAreaRef.current) {
-      messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
-    }
-  }, [messages, isThinking]);
-
   const handleStartChat = useCallback(() => {
     setShowWelcomeScreen(false);
     setMessages([
@@ -160,6 +176,20 @@ export default function DreamFlowPage() {
     streamBotResponse(userInput, sessionId, onChunkReceived, onError, onStreamEnd);
   }, [sessionId, isThinking]);
   
+  const handleOpenQuiz = () => {
+    setModalContent('quiz');
+  };
+  
+  const handleCloseModal = () => {
+    setModalContent(null);
+  };
+  
+  const handleQuizComplete = (answers, summary) => {
+    const generatedData = generateAdviceVisual(answers, summary);
+    setRoadmapData(generatedData);
+    setModalContent('roadmap');
+  };
+
   return (
     <div className="dreamflow-app">
       {showWelcomeScreen ? (
@@ -255,6 +285,22 @@ export default function DreamFlowPage() {
           </div>
         </div>
       )}
+
+      {!showWelcomeScreen && (
+        <button className="fab-roadmap" onClick={handleOpenQuiz} title="Generate Career Roadmap">
+          <svg className="fab-roadmap-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor">
+            <path d="M3.5 16.5L3.5 19.5M3.5 4.5L3.5 13.5M9.5 4.5L9.5 10.5M9.5 13.5L9.5 19.5M15.5 4.5L15.5 19.5M21.5 4.5L21.5 7.5M21.5 10.5L21.5 19.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      )}
+
+      <Modal isOpen={modalContent === 'quiz'} onClose={handleCloseModal}>
+        <QuizPage onComplete={handleQuizComplete} />
+      </Modal>
+
+      <Modal isOpen={modalContent === 'roadmap'} onClose={handleCloseModal}>
+        <RoadmapDisplay data={roadmapData} />
+      </Modal>
     </div>
   );
 }
