@@ -1,55 +1,75 @@
 .college-finder {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* Header Section */
 .cf-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 20px;
-  padding: 40px;
-  margin-bottom: 30px;
+  border-radius: 24px;
+  padding: 50px 40px;
+  margin: 30px 0;
   color: white;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cf-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+  opacity: 0.3;
 }
 
 .cf-header-content {
   max-width: 600px;
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 .cf-title {
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: 3rem;
+  font-weight: 800;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1rem;
+  letter-spacing: -0.5px;
 }
 
 .cf-icon {
-  font-size: 2.8rem;
+  font-size: 3.2rem;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
 .cf-subtitle {
-  font-size: 1.1rem;
-  opacity: 0.9;
+  font-size: 1.2rem;
+  opacity: 0.95;
   line-height: 1.6;
+  font-weight: 400;
 }
 
 /* Controls Section */
 .cf-controls {
   background: white;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  margin: 40px 0;
   display: grid;
   grid-template-columns: 1fr 2fr;
-  gap: 25px;
+  gap: 30px;
   align-items: center;
+  border: 1px solid #f0f0f0;
 }
 
 .cf-search-box {
@@ -64,77 +84,99 @@
 
 .search-icon {
   position: absolute;
-  left: 15px;
+  left: 20px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  color: #6b7280;
 }
 
 .cf-search-input {
   width: 100%;
-  padding: 12px 15px 12px 45px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
+  padding: 16px 20px 16px 50px;
+  border: 2px solid #f3f4f6;
+  border-radius: 12px;
   font-size: 1rem;
   transition: all 0.3s ease;
+  background: #fafafa;
 }
 
 .cf-search-input:focus {
   outline: none;
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .cf-filter-controls {
   display: flex;
-  gap: 15px;
+  gap: 20px;
   align-items: center;
   justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
 }
 
 .cf-filter-select {
-  padding: 10px 15px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  padding: 12px 16px;
+  border: 2px solid #f3f4f6;
+  border-radius: 10px;
+  font-size: 0.95rem;
   background: white;
   cursor: pointer;
   transition: all 0.3s ease;
+  min-width: 120px;
 }
 
 .cf-filter-select:focus {
   outline: none;
   border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .cf-locate-btn {
-  padding: 12px 20px;
+  padding: 14px 24px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   color: white;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   transition: all 0.3s ease;
   white-space: nowrap;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 .cf-locate-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
 }
 
 .cf-locate-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+  transform: none;
 }
 
 .loading-spinner {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border: 2px solid transparent;
   border-top: 2px solid white;
   border-radius: 50%;
@@ -153,171 +195,96 @@
 /* Map Section */
 .cf-map-section {
   display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 25px;
-  margin-bottom: 40px;
+  grid-template-columns: 1fr 320px;
+  gap: 30px;
+  margin: 40px 0;
 }
 
 .cf-map-container {
   position: relative;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 .cf-stats-card {
   background: white;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
   height: fit-content;
+  border: 1px solid #f0f0f0;
 }
 
 .cf-stats-card h3 {
-  margin-bottom: 20px;
-  color: #2d3748;
-  font-size: 1.2rem;
+  margin-bottom: 25px;
+  color: #1f2937;
+  font-size: 1.3rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .stats-grid {
   display: grid;
-  gap: 15px;
+  gap: 20px;
 }
 
 .stat-item {
   text-align: center;
-  padding: 15px;
-  background: #f7fafc;
-  border-radius: 10px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
 }
 
 .stat-number {
   display: block;
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
   color: #3b82f6;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  line-height: 1;
 }
 
 .stat-label {
-  font-size: 0.9rem;
-  color: #718096;
+  font-size: 0.95rem;
+  color: #6b7280;
+  font-weight: 500;
 }
 
 /* Info Window Styles */
 .info-window {
-  min-width: 200px;
+  min-width: 250px;
+  padding: 5px;
 }
 
 .info-window h3 {
-  margin: 0 0 10px 0;
-  color: #2d3748;
-  font-size: 1.1rem;
+  margin: 0 0 12px 0;
+  color: #1f2937;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
-.info-window p {
-  margin: 5px 0;
-  color: #718096;
+.info-address {
+  margin: 0 0 15px 0;
+  color: #6b7280;
   font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .rating-info {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin: 8px 0;
-}
-
-.rating-count {
-  font-size: 0.8rem;
-  color: #a0aec0;
-}
-
-.open-status {
-  font-weight: 600;
-  margin-top: 8px !important;
-}
-
-/* Results Section */
-.cf-results-section {
-  margin-bottom: 40px;
-}
-
-.cf-results-title {
-  font-size: 1.8rem;
-  color: #2d3748;
-  margin-bottom: 25px;
-  text-align: center;
-}
-
-.cf-empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-}
-
-.empty-icon {
-  font-size: 4rem;
-  margin-bottom: 20px;
-}
-
-.cf-empty-state h3 {
-  color: #2d3748;
-  margin-bottom: 10px;
-}
-
-.cf-empty-state p {
-  color: #718096;
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-/* Colleges Grid */
-.cf-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
-}
-
-.cf-card {
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: 2px solid transparent;
-}
-
-.cf-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-  border-color: #3b82f6;
-}
-
-.cf-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
-}
-
-.cf-card-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #2d3748;
-  margin: 0;
-  flex: 1;
-  margin-right: 15px;
-}
-
-.cf-rating {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: #f7fafc;
-  padding: 5px 10px;
-  border-radius: 20px;
-  white-space: nowrap;
+  gap: 8px;
+  margin: 12px 0;
+  font-size: 0.95rem;
 }
 
 .rating-value {
@@ -325,10 +292,162 @@
   color: #f59e0b;
 }
 
-.cf-address {
-  color: #718096;
+.rating-count {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.open-status {
+  font-weight: 600;
+  margin: 12px 0 !important;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: inline-block;
+}
+
+.open-status.open {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.open-status.closed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.info-directions-btn {
+  width: 100%;
+  padding: 10px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-top: 10px;
+}
+
+.info-directions-btn:hover {
+  background: #2563eb;
+}
+
+/* Results Section */
+.cf-results-section {
+  margin: 50px 0;
+}
+
+.cf-results-title {
+  font-size: 2rem;
+  color: #1f2937;
+  margin-bottom: 30px;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.cf-empty-state {
+  text-align: center;
+  padding: 80px 40px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+}
+
+.empty-icon {
+  font-size: 5rem;
+  margin-bottom: 25px;
+  opacity: 0.7;
+}
+
+.cf-empty-state h3 {
+  color: #1f2937;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.cf-empty-state p {
+  color: #6b7280;
+  max-width: 400px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Colleges Grid */
+.cf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 25px;
+}
+
+.cf-card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid #f0f0f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.cf-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.cf-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+.cf-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 20px;
+}
+
+.cf-card-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  flex: 1;
+  margin-right: 15px;
+  line-height: 1.3;
+}
+
+.cf-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fffbeb;
+  padding: 6px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  border: 1px solid #fef3c7;
+}
+
+.rating-value {
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+.cf-address {
+  color: #6b7280;
+  margin-bottom: 25px;
   line-height: 1.5;
+  font-size: 0.95rem;
 }
 
 .cf-card-footer {
@@ -340,8 +459,8 @@
 .cf-status {
   font-size: 0.9rem;
   font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
 }
 
 .cf-status.open {
@@ -354,35 +473,51 @@
   color: #991b1b;
 }
 
+.card-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 .cf-view-btn {
   background: #3b82f6;
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 18px;
+  border-radius: 8px;
   font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.3s ease;
+  font-weight: 500;
 }
 
 .cf-view-btn:hover {
   background: #2563eb;
 }
 
+.cf-directions-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cf-directions-btn:hover {
+  background: #059669;
+}
+
 /* Responsive Design */
-@media (max-width: 968px) {
-  .cf-controls {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .cf-filter-controls {
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-
+@media (max-width: 1200px) {
   .cf-map-section {
     grid-template-columns: 1fr;
+    gap: 25px;
   }
 
   .cf-stats-card {
@@ -390,15 +525,32 @@
   }
 }
 
+@media (max-width: 968px) {
+  .cf-controls {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .cf-filter-controls {
+    justify-content: flex-start;
+  }
+}
+
 @media (max-width: 768px) {
+  .college-finder {
+    padding: 0 15px;
+  }
+
   .cf-header {
-    padding: 30px 20px;
+    padding: 40px 25px;
+    border-radius: 20px;
+    margin: 20px 0;
   }
 
   .cf-title {
-    font-size: 2rem;
+    font-size: 2.2rem;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.8rem;
   }
 
   .cf-grid {
@@ -406,27 +558,29 @@
   }
 
   .cf-controls {
-    padding: 20px;
+    padding: 25px;
   }
 
   .cf-filter-controls {
     flex-direction: column;
     align-items: stretch;
+    gap: 15px;
+  }
+
+  .filter-group {
+    justify-content: space-between;
   }
 
   .cf-locate-btn {
     justify-content: center;
+    margin-top: 10px;
   }
 }
 
 @media (max-width: 480px) {
-  .college-finder {
-    padding: 0 15px;
-  }
-
   .cf-header {
-    padding: 25px 15px;
-    border-radius: 15px;
+    padding: 30px 20px;
+    border-radius: 16px;
   }
 
   .cf-title {
@@ -434,6 +588,22 @@
   }
 
   .cf-controls {
-    padding: 15px;
+    padding: 20px;
+  }
+
+  .cf-map-section {
+    gap: 20px;
+  }
+
+  .cf-stats-card {
+    padding: 25px;
+  }
+
+  .cf-card {
+    padding: 25px;
+  }
+
+  .containerStyle {
+    height: 400px;
   }
 }
