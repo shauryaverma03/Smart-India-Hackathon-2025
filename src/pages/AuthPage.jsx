@@ -15,6 +15,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import Notification from "../components/Notification";
+import axios from "axios"; // 1. IMPORT AXIOS
 
 // Card data for animation
 const cards = [
@@ -97,6 +98,20 @@ export default function AuthPage({ type }) {
           displayName: user.displayName || "",
           quizCompleted: false,
         });
+        
+        // 2. SEND EMAIL FOR NEW GOOGLE SIGNUP
+        try {
+          const apiUrl = `${process.env.REACT_APP_API_URL}/api/send-welcome-email`;
+          await axios.post(apiUrl, {
+            name: user.displayName || "New User",
+            email: user.email,
+          });
+          console.log("Welcome email request sent for Google user.");
+        } catch (emailError) {
+          console.error("Failed to send welcome email:", emailError);
+          // Non-critical error, so we don't show a notification to the user
+        }
+
         navigate("/quiz");
         showNotificationWithMessage("✅ Signed in with Google!");
         return;
@@ -128,6 +143,19 @@ export default function AuthPage({ type }) {
         displayName: fullName,
         quizCompleted: false,
       });
+      
+      // 3. SEND EMAIL FOR NEW EMAIL SIGNUP
+      try {
+        const apiUrl = `${process.env.REACT_APP_API_URL}/api/send-welcome-email`;
+        await axios.post(apiUrl, {
+          name: fullName,
+          email: email,
+        });
+        console.log("Welcome email request sent for email user.");
+      } catch (emailError) {
+        console.error("Failed to send welcome email:", emailError);
+      }
+
       showNotificationWithMessage("🎉 Account created successfully! Welcome!");
       setTimeout(() => { navigate("/quiz"); }, 1500);
     } catch (error) {
@@ -140,7 +168,7 @@ export default function AuthPage({ type }) {
     }
   };
 
-  // Email Sign-In
+  // Email Sign-In (No changes needed here as emails are for signups)
   const handleEmailSignIn = async () => {
     if (!email || !password) {
       showNotificationWithMessage("❌ Please enter both email and password.");

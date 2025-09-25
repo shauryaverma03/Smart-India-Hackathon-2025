@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./LoginPage.css";
 import { auth, db } from "../firebase";
-import { 
-  GoogleAuthProvider, 
+import {
+  GoogleAuthProvider,
   signInWithPopup,
   signInWithEmailAndPassword,
   sendPasswordResetEmail
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import Notification from "../components/Notification";
+import axios from "axios"; // 1. IMPORT AXIOS
 
 export default function LoginPage() {
   const [hover, setHover] = useState(false);
@@ -66,6 +67,19 @@ export default function LoginPage() {
     try {
       const userCredential = await signInWithPopup(auth, provider);
       const user = userCredential.user;
+
+      // 2. SEND EMAIL ON GOOGLE LOGIN
+      try {
+        const apiUrl = `${process.env.REACT_APP_API_URL}/api/send-welcome-email`;
+        await axios.post(apiUrl, {
+          name: user.displayName || "New User",
+          email: user.email,
+        });
+        console.log("Welcome email request sent for Google user (Login).");
+      } catch (emailError) {
+        console.error("Failed to send welcome email on login:", emailError);
+      }
+
       const userDocRef = doc(db, "users", user.uid);
       const snap = await getDoc(userDocRef);
       if (!snap.exists()) {
@@ -94,6 +108,19 @@ export default function LoginPage() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+
+      // 3. SEND EMAIL ON EMAIL LOGIN
+      try {
+        const apiUrl = `${process.env.REACT_APP_API_URL}/api/send-welcome-email`;
+        await axios.post(apiUrl, {
+          name: user.displayName || "Valued User",
+          email: user.email,
+        });
+        console.log("Welcome email request sent for email user (Login).");
+      } catch (emailError) {
+        console.error("Failed to send welcome email on login:", emailError);
+      }
+
       const userDocRef = doc(db, "users", user.uid);
       const snap = await getDoc(userDocRef);
       if (!snap.exists()) {
