@@ -17,7 +17,6 @@ import {
 import Notification from "../components/Notification";
 import axios from "axios"; // 1. IMPORT AXIOS
 
-// Card data for animation
 const cards = [
   {
     img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80",
@@ -42,7 +41,6 @@ export default function AuthPage({ type }) {
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
 
-  // State for form inputs
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -56,14 +54,13 @@ export default function AuthPage({ type }) {
     return () => clearInterval(timer);
   }, []);
 
-  // Notification helper
   const showNotificationWithMessage = (message, duration = 4000) => {
     setNotificationMessage(message);
     setShowNotification(true);
     setTimeout(() => setShowNotification(false), duration);
   };
 
-  // Helper: Redirect based on quiz status
+  // Always redirect to /dashboard
   const redirectAfterAuth = async (user) => {
     if (!user) {
       showNotificationWithMessage("User authentication failed.");
@@ -72,23 +69,24 @@ export default function AuthPage({ type }) {
     try {
       const docRef = doc(db, "users", user.uid);
       const snap = await getDoc(docRef);
-      if (!snap.exists() || !snap.data().quizCompleted) {
-        navigate("/quiz");
-      } else {
-        navigate("/dashboard");
+      if (!snap.exists()) {
+        await setDoc(docRef, {
+          email: user.email,
+          displayName: user.displayName || "",
+          quizCompleted: false,
+        });
       }
+      navigate("/dashboard");
     } catch (err) {
-      console.error("Error checking quiz status", err);
-      navigate("/quiz"); // default to quiz on error
+      console.error("Error checking user status", err);
+      navigate("/dashboard");
     }
   };
 
-  // Google Sign-In
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     try {
       const userCredential = await signInWithPopup(auth, provider);
-      // Create user doc if not exists
       const user = userCredential.user;
       const docRef = doc(db, "users", user.uid);
       const snap = await getDoc(docRef);
@@ -98,7 +96,7 @@ export default function AuthPage({ type }) {
           displayName: user.displayName || "",
           quizCompleted: false,
         });
-        
+
         // 2. SEND EMAIL FOR NEW GOOGLE SIGNUP
         try {
           const apiUrl = `${process.env.REACT_APP_API_URL}/api/send-welcome-email`;
@@ -109,12 +107,7 @@ export default function AuthPage({ type }) {
           console.log("Welcome email request sent for Google user.");
         } catch (emailError) {
           console.error("Failed to send welcome email:", emailError);
-          // Non-critical error, so we don't show a notification to the user
         }
-
-        navigate("/quiz");
-        showNotificationWithMessage("✅ Signed in with Google!");
-        return;
       }
       await redirectAfterAuth(user);
       showNotificationWithMessage("✅ Signed in with Google!");
@@ -124,7 +117,6 @@ export default function AuthPage({ type }) {
     }
   };
 
-  // Email Sign-Up
   const handleEmailSignUp = async () => {
     if (!fullName || !email || !password) {
       showNotificationWithMessage("❌ Please fill in all fields.");
@@ -137,13 +129,12 @@ export default function AuthPage({ type }) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName: fullName });
-      // Create user doc with quizCompleted: false
       await setDoc(doc(db, "users", userCredential.user.uid), {
         email,
         displayName: fullName,
         quizCompleted: false,
       });
-      
+
       // 3. SEND EMAIL FOR NEW EMAIL SIGNUP
       try {
         const apiUrl = `${process.env.REACT_APP_API_URL}/api/send-welcome-email`;
@@ -157,7 +148,7 @@ export default function AuthPage({ type }) {
       }
 
       showNotificationWithMessage("🎉 Account created successfully! Welcome!");
-      setTimeout(() => { navigate("/quiz"); }, 1500);
+      setTimeout(() => { navigate("/dashboard"); }, 1500);
     } catch (error) {
       console.error("Error creating account:", error);
       if (error.code === 'auth/email-already-in-use') {
@@ -168,7 +159,6 @@ export default function AuthPage({ type }) {
     }
   };
 
-  // Email Sign-In (No changes needed here as emails are for signups)
   const handleEmailSignIn = async () => {
     if (!email || !password) {
       showNotificationWithMessage("❌ Please enter both email and password.");
@@ -177,7 +167,6 @@ export default function AuthPage({ type }) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      // Ensure Firestore user doc exists
       const userDocRef = doc(db, "users", user.uid);
       const snap = await getDoc(userDocRef);
       if (!snap.exists()) {
@@ -186,9 +175,6 @@ export default function AuthPage({ type }) {
           displayName: user.displayName || "",
           quizCompleted: false,
         });
-        navigate("/quiz");
-        showNotificationWithMessage("✅ Welcome! Please take the quiz.");
-        return;
       }
       await redirectAfterAuth(user);
       showNotificationWithMessage("✅ Welcome back!");

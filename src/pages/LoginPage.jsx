@@ -34,6 +34,7 @@ export default function LoginPage() {
     setTimeout(() => setShowNotification(false), duration);
   };
 
+  // Always redirect to /dashboard
   const redirectAfterAuth = async (user) => {
     if (!user) {
       showNotificationWithMessage("User authentication failed.");
@@ -48,17 +49,11 @@ export default function LoginPage() {
           displayName: user.displayName || "",
           quizCompleted: false,
         });
-        navigate("/quiz");
-        return;
       }
-      if (!snap.data().quizCompleted) {
-        navigate("/quiz");
-      } else {
-        navigate("/dashboard");
-      }
+      navigate("/dashboard");
     } catch (err) {
-      console.error("Error checking quiz status", err);
-      navigate("/quiz");
+      console.error("Error checking user status", err);
+      navigate("/dashboard");
     }
   };
 
@@ -88,9 +83,6 @@ export default function LoginPage() {
           displayName: user.displayName || "",
           quizCompleted: false,
         });
-        navigate("/quiz");
-        showNotificationWithMessage("✅ Successfully signed in with Google!");
-        return;
       }
       await redirectAfterAuth(user);
       showNotificationWithMessage("✅ Successfully signed in with Google!");
@@ -129,9 +121,6 @@ export default function LoginPage() {
           displayName: user.displayName || "",
           quizCompleted: false,
         });
-        navigate("/quiz");
-        showNotificationWithMessage("✅ Welcome! Please take the quiz.");
-        return;
       }
       await redirectAfterAuth(user);
       showNotificationWithMessage("✅ Welcome back!");
@@ -220,7 +209,6 @@ export default function LoginPage() {
                 </button>
               </div>
               <div className="auth-login-row">
-                {/* --- CORRECTED ELEMENT #1 --- */}
                 <button type="button" className="auth-login-forgot-link" onClick={() => setView('forgotPassword')}>
                   Forgot your password?
                 </button>
@@ -247,7 +235,6 @@ export default function LoginPage() {
                 Send Reset Link
               </button>
               <p className="auth-login-signup-link">
-                 {/* --- CORRECTED ELEMENT #2 --- */}
                 <button type="button" className="auth-login-forgot-link" onClick={() => setView('login')}>
                   ← Back to Login
                 </button>
