@@ -10,7 +10,8 @@ import EventsPage from "./EventsPage";
 import CommunityPage from "./CommunityPage";
 import JobsPage from "./JobsPage";
 import CollegeFinder from "./CollegeFinderPage";
-import TaskReminder from "./TaskReminder"; // ✅ new import
+import TaskReminder from "./TaskReminder";
+import CoursesPage from "./CoursesPage"; // ✅ NEW Import
 import {
   collection,
   collectionGroup,
@@ -32,6 +33,7 @@ import {
   MdChat,
   MdAutoAwesome,
   MdSchool,
+  MdLibraryBooks, // ✅ Icon for Courses
 } from "react-icons/md";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -50,7 +52,8 @@ const SIDEBAR_MENU = [
   { name: "Resume Analyser", icon: <MdDescription /> },
   { name: "Settings", icon: <MdSettings /> },
   { name: "College Finder", icon: <MdSchool /> },
-  { name: "Task Reminder", icon: <MdDescription /> }, // ✅ new
+  { name: "Task Reminder", icon: <MdDescription /> },
+  { name: "Courses", icon: <MdLibraryBooks /> }, // ✅ New Courses tab
 ];
 
 // ✅ Get initial letter for avatar
@@ -230,7 +233,9 @@ export default function Dashboard() {
       case 10:
         return <CollegeFinder />;
       case 11:
-        return <TaskReminder />; // ✅ Task Reminder Page
+        return <TaskReminder />;
+      case 12:
+        return <CoursesPage />; // ✅ New Courses Page
       default:
         return (
           <div className="dashboard-center">

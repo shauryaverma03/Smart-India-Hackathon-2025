@@ -9,12 +9,12 @@ import "./CollegeFinder.css";
 
 const containerStyle = {
   width: "100%",
-  height: "500px",
+  height: "400px",
   borderRadius: "12px",
 };
 
 const CollegeFinder = () => {
-  const [center, setCenter] = useState({ lat: 28.6139, lng: 77.209 });
+  const [center, setCenter] = useState({ lat: 28.6139, lng: 77.209 }); // Default: Delhi
   const [colleges, setColleges] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -24,8 +24,9 @@ const CollegeFinder = () => {
     sortBy: "distance",
   });
 
-  const apiKey = "YOUR_API_KEY";
+  const apiKey = "AIzaSyAOVYRIgupAurZup5y1PRh8Ismb1A3lLao"; // replace with your key
 
+  // Locate user
   const handleLocate = () => {
     setLoading(true);
     navigator.geolocation.getCurrentPosition(
@@ -42,6 +43,7 @@ const CollegeFinder = () => {
     );
   };
 
+  // Fetch nearby colleges
   const fetchNearbyColleges = (lat, lng) => {
     fetch(
       `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=5000&type=university&key=${apiKey}`
@@ -59,6 +61,7 @@ const CollegeFinder = () => {
       });
   };
 
+  // Filter colleges based on search and filters
   const filteredColleges = colleges
     .filter(
       (college) =>
@@ -150,7 +153,7 @@ const CollegeFinder = () => {
         </div>
       </div>
 
-      {/* Map Section - Centered */}
+      {/* Map Section */}
       <div className="cf-map-section">
         <div className="cf-map-container">
           <LoadScript googleMapsApiKey={apiKey} libraries={["places"]}>
@@ -223,6 +226,23 @@ const CollegeFinder = () => {
               )}
             </GoogleMap>
           </LoadScript>
+        </div>
+
+        {/* Stats Card */}
+        <div className="cf-stats-card">
+          <h3>Search Results</h3>
+          <div className="stats-grid">
+            <div className="stat-item">
+              <span className="stat-number">{filteredColleges.length}</span>
+              <span className="stat-label">Colleges Found</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">
+                {filteredColleges.filter((c) => c.rating >= 4).length}
+              </span>
+              <span className="stat-label">Highly Rated (4+)</span>
+            </div>
+          </div>
         </div>
       </div>
 
