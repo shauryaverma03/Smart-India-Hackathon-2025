@@ -235,7 +235,8 @@ export default function Dashboard() {
       case 11:
         return <TaskReminder />;
       case 12:
-        return <CoursesPage />; // ✅ New Courses Page
+        // ✅ THIS IS THE ONLY LINE THAT WAS CHANGED
+        return <CoursesPage currentUser={user} />;
       default:
         return (
           <div className="dashboard-center">

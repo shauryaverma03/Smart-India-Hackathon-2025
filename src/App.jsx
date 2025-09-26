@@ -8,15 +8,17 @@ import ChatPage from "./pages/ChatPage";
 import QuizPage from "./pages/QuizPage";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
-import HeroSection from "./components/HeroSection"; // ✅ New hero import
+import HeroSection from "./components/HeroSection";
+import CoursesPage from "./pages/CoursesPage"; // ✅ 1. IMPORT THE COURSES PAGE
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
+import { onAuthStateChanged } from "firebase/auth"; // ✅ 2. IMPORT AUTH LISTENER
 import { doc, getDoc } from "firebase/firestore";
 import LoadingScreen from "./components/LoadingScreen";
 import "./App.css";
 import "./HomePage.css";
 
-// Route guard for dashboard, chat, settings, and profile
+// This component is fine, no changes needed here.
 function RequireQuizCompleted({ children }) {
   const [loading, setLoading] = useState(true);
   const [allow, setAllow] = useState(false);
@@ -50,19 +52,42 @@ function RequireQuizCompleted({ children }) {
 
 export default function App() {
   const location = useLocation();
-  const fullscreenRoutes = ["/login", "/signup", "/dashboard", "/quiz"];
-  const isFullscreen = fullscreenRoutes.some((r) =>
-    location.pathname.startsWith(r)
-  );
+  
+  // ✅ 3. ADD STATE TO MANAGE USER AND LOADING STATUS
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // ✅ 4. ADD EFFECT TO LISTEN FOR AUTH CHANGES
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user); // Set user to the user object or null
+      setAuthLoading(false); // Auth check is complete
+    });
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
+
+  // Show a loading screen while Firebase checks auth status
+  if (authLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="App">
       <Routes>
-        {/* ✅ Updated home route with HeroSection */}
         <Route path="/" element={<HeroSection />} />
-
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<AuthPage type="signup" />} />
+        
+        {/* ✅ 5. ADD THE NEW ROUTE FOR COURSES and pass currentUser prop */}
+        <Route 
+          path="/courses" 
+          element={<CoursesPage currentUser={currentUser} />} 
+        />
+        
+        <Route path="/quiz" element={<QuizPage />} />
+
+        {/* These protected routes are fine, no changes needed */}
         <Route
           path="/dashboard"
           element={
@@ -95,7 +120,6 @@ export default function App() {
             </RequireQuizCompleted>
           }
         />
-        <Route path="/quiz" element={<QuizPage />} />
       </Routes>
     </div>
   );

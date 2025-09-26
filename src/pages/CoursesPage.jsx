@@ -6,7 +6,7 @@ import "./CoursesPage.css";
 
 const API_BASE_URL = "https://courses-backend-production-e28c.up.railway.app";
 
-// --- Sub-components ---
+// --- Sub-components (No Changes) ---
 const CourseCardSkeleton = () => (
   <div className="course-item-card is-loading">
     <div className="skeleton skeleton-image"></div>
@@ -30,7 +30,6 @@ const CourseCard = ({ course }) => (
     </div>
     <div className="course-item-details">
       <div>
-        {/* The API provides instructors inside an array, we'll show the first one */}
         <span className="course-item-provider">
           {course.visible_instructors?.[0]?.title || "Udemy"}
         </span>
@@ -48,7 +47,7 @@ const CourseCard = ({ course }) => (
   </div>
 );
 
-// --- Main Page Component ---
+// --- Main Page Component (Corrected) ---
 export default function CoursesPage({ currentUser }) {
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,7 +56,10 @@ export default function CoursesPage({ currentUser }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    console.log("CoursesPage useEffect triggered. currentUser:", currentUser);
+
     if (!currentUser) {
+      setError("Please log in to view your recommended courses.");
       setIsLoading(false);
       return;
     }
@@ -65,38 +67,47 @@ export default function CoursesPage({ currentUser }) {
     const fetchRecommendedCourses = async () => {
       try {
         setIsLoading(true);
+        setError(null);
         let interests = [];
-        // Get user's name and quiz interests
-        try {
-          const userDocRef = doc(db, "users", currentUser.uid);
-          // THIS LINE IS NOW CORRECTED
-          const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserName(userData?.name || currentUser.displayName || "");
-            interests = userData?.quizResults?.interests || [];
-          } else {
-            // Set username even if there's no doc yet
-            setUserName(currentUser.displayName || "");
-          }
-        } catch (firestoreError) {
-          console.error(
-            "Firestore permission error. Will show default courses.",
-            firestoreError.message
-          );
-          // Set username from auth as a fallback
-          setUserName(currentUser.displayName || "");
+        let fetchedUserName = currentUser.displayName || ""; 
+
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          fetchedUserName = userData?.name || fetchedUserName;
+          interests = userData?.quizResults?.interests || [];
+          console.log("Firestore data found:", { name: fetchedUserName, interests });
+        } else {
+          console.warn("No user document found in Firestore.");
+        }
+        
+        setUserName(fetchedUserName);
+
+        // ✅ --- THIS IS THE LOGIC THAT WAS CHANGED --- ✅
+        let apiUrl = "";
+        if (interests.length > 0) {
+          // If user has interests, fetch personalized courses
+          const interestsQuery = interests.join(",");
+          apiUrl = `${API_BASE_URL}/api/courses?interests=${interestsQuery}`;
+          console.log("Fetching PERSONALIZED courses from API:", apiUrl);
+        } else {
+          // If user has NO interests, fetch default courses
+          apiUrl = `${API_BASE_URL}/api/courses`;
+          console.log("User has no interests. Fetching DEFAULT courses from API:", apiUrl);
         }
 
-        const interestsQuery = interests.join(",");
-        const apiUrl = `${API_BASE_URL}/api/courses?interests=${interestsQuery}`;
-
         const response = await fetch(apiUrl);
-        if (!response.ok)
+        if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const data = await response.json();
+        console.log("API response received:", data);
+
         setCourses(Array.isArray(data) ? data : []);
+
       } catch (err) {
         console.error("Error fetching course data:", err);
         setError("Could not load course data. Please try again later.");
@@ -104,6 +115,7 @@ export default function CoursesPage({ currentUser }) {
         setIsLoading(false);
       }
     };
+
     fetchRecommendedCourses();
   }, [currentUser]);
 
@@ -127,7 +139,7 @@ export default function CoursesPage({ currentUser }) {
           <MdOutlineSchool className="courses-empty-icon" />
           <h3 className="courses-empty-title">No Courses Found</h3>
           <p className="courses-empty-desc">
-            Try adjusting your search or check back later for new courses.
+            We couldn't find any courses matching your criteria at the moment.
           </p>
         </div>
       );
@@ -144,7 +156,9 @@ export default function CoursesPage({ currentUser }) {
           <div>
             <h1 className="courses-title">Explore Courses</h1>
             <p className="courses-subtitle">
-              Find the next step in your professional journey, {userName}.
+              {userName
+                ? `Find the next step in your professional journey, ${userName}.`
+                : "Courses recommended just for you."}
             </p>
           </div>
         </div>
@@ -156,6 +170,7 @@ export default function CoursesPage({ currentUser }) {
               placeholder="Search recommended courses..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              disabled={isLoading || error || courses.length === 0}
             />
           </div>
         </div>
