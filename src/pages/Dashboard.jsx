@@ -11,7 +11,8 @@ import CommunityPage from "./CommunityPage";
 import JobsPage from "./JobsPage";
 import CollegeFinder from "./CollegeFinderPage";
 import TaskReminder from "./TaskReminder";
-import CoursesPage from "./CoursesPage"; // ✅ NEW Import
+import CoursesPage from "./CoursesPage";
+import ScholarshipPage from "./ScholarshipPage"; // ✅ Scholarship import
 import {
   collection,
   collectionGroup,
@@ -33,17 +34,19 @@ import {
   MdChat,
   MdAutoAwesome,
   MdSchool,
-  MdLibraryBooks, // ✅ Icon for Courses
+  MdLibraryBooks,
+  MdCardMembership, // ✅ Scholarship icon
 } from "react-icons/md";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Dashboard.css";
 
-// ✅ Sidebar Menu Items
+// ✅ Updated Sidebar Menu Items with Scholarships
 const SIDEBAR_MENU = [
   { name: "People", icon: <MdPeople /> },
   { name: "Jobs", icon: <MdWork /> },
   { name: "Community", icon: <MdGroups /> },
+  { name: "Scholarships", icon: <MdCardMembership /> }, // ✅ NEW Scholarship tab
   { name: "DreamFlow AI", icon: <MdAutoAwesome /> },
   { name: "Notifications", icon: <MdNotifications /> },
   { name: "Messages", icon: <MdChat /> },
@@ -53,7 +56,7 @@ const SIDEBAR_MENU = [
   { name: "Settings", icon: <MdSettings /> },
   { name: "College Finder", icon: <MdSchool /> },
   { name: "Task Reminder", icon: <MdDescription /> },
-  { name: "Courses", icon: <MdLibraryBooks /> }, // ✅ New Courses tab
+  { name: "Courses", icon: <MdLibraryBooks /> },
 ];
 
 // ✅ Get initial letter for avatar
@@ -65,7 +68,7 @@ function getInitial(name, email) {
 
 function getTabFromQuery(location) {
   const params = new URLSearchParams(location.search);
-  if (params.get("tab") === "settings") return 9;
+  if (params.get("tab") === "settings") return 10; // ✅ Updated index for settings (was 9, now 10 because scholarship added at index 3)
   return null;
 }
 
@@ -178,15 +181,17 @@ export default function Dashboard() {
   function handleSidebarToggle() {
     setSidebarOpen((open) => !open);
   }
+
   function handleLogoClick() {
     navigate("/");
     setSidebarOpen(false);
   }
+
   function handleLoginRedirect() {
     navigate("/login");
   }
 
-  // ✅ Render Page Content
+  // ✅ Updated Render Page Content with Scholarships
   function renderContent() {
     if (!isLoggedIn) {
       return (
@@ -217,26 +222,27 @@ export default function Dashboard() {
       case 2:
         return <CommunityPage />;
       case 3:
-        return <DreamFlowPage currentUser={user} />;
+        return <ScholarshipPage currentUser={user} />; // ✅ NEW Scholarship case
       case 4:
-        return <NotificationsPage currentUser={user} />;
+        return <DreamFlowPage currentUser={user} />;
       case 5:
-        return <MessagesPage currentUser={user} />;
+        return <NotificationsPage currentUser={user} />;
       case 6:
-        return <EventsPage />;
+        return <MessagesPage currentUser={user} />;
       case 7:
-        return <ResumeBuilder />;
+        return <EventsPage />;
       case 8:
-        return <ResumeAnalyserPage currentUser={user} />;
+        return <ResumeBuilder />;
       case 9:
-        return <Settings currentUser={user} />;
+        return <ResumeAnalyserPage currentUser={user} />;
       case 10:
-        return <CollegeFinder />;
+        return <Settings currentUser={user} />; // ✅ Updated index (was 9, now 10)
       case 11:
-        return <TaskReminder />;
+        return <CollegeFinder />; // ✅ Updated index (was 10, now 11)
       case 12:
-        // ✅ THIS IS THE ONLY LINE THAT WAS CHANGED
-        return <CoursesPage currentUser={user} />;
+        return <TaskReminder />; // ✅ Updated index (was 11, now 12)
+      case 13:
+        return <CoursesPage currentUser={user} />; // ✅ Updated index (was 12, now 13)
       default:
         return (
           <div className="dashboard-center">
