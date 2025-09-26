@@ -8,9 +8,7 @@ import ChatPage from "./pages/ChatPage";
 import QuizPage from "./pages/QuizPage";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
-import HeroSection from "./components/HeroSection";
-import TaskReminder from "./pages/TaskReminder";
-import CoursesPage from "./pages/CoursesPage"; // ✅ NEW Import
+import HeroSection from "./components/HeroSection"; // ✅ New hero import
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -18,7 +16,7 @@ import LoadingScreen from "./components/LoadingScreen";
 import "./App.css";
 import "./HomePage.css";
 
-// ✅ Route guard
+// Route guard for dashboard, chat, settings, and profile
 function RequireQuizCompleted({ children }) {
   const [loading, setLoading] = useState(true);
   const [allow, setAllow] = useState(false);
@@ -58,68 +56,47 @@ export default function App() {
   );
 
   return (
-    <Routes>
-      {/* ✅ Home Route */}
-      <Route path="/" element={<HeroSection />} />
+    <div className="App">
+      <Routes>
+        {/* ✅ Updated home route with HeroSection */}
+        <Route path="/" element={<HeroSection />} />
 
-      {/* Auth Routes */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<AuthPage type="signup" />} />
-
-      {/* Protected Routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <RequireQuizCompleted>
-            <Dashboard />
-          </RequireQuizCompleted>
-        }
-      />
-      <Route
-        path="/chat/:chatId"
-        element={
-          <RequireQuizCompleted>
-            <ChatPage />
-          </RequireQuizCompleted>
-        }
-      />
-      <Route
-        path="/settings"
-        element={
-          <RequireQuizCompleted>
-            <Settings />
-          </RequireQuizCompleted>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <RequireQuizCompleted>
-            <Profile />
-          </RequireQuizCompleted>
-        }
-      />
-      <Route path="/quiz" element={<QuizPage />} />
-
-      {/* ✅ New Task Reminder Route */}
-      <Route
-        path="/task-reminder"
-        element={
-          <RequireQuizCompleted>
-            <TaskReminder />
-          </RequireQuizCompleted>
-        }
-      />
-
-      {/* ✅ New Courses Page Route */}
-      <Route
-        path="/courses"
-        element={
-          <RequireQuizCompleted>
-            <CoursesPage />
-          </RequireQuizCompleted>
-        }
-      />
-    </Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<AuthPage type="signup" />} />
+        <Route
+          path="/dashboard"
+          element={
+            <RequireQuizCompleted>
+              <Dashboard />
+            </RequireQuizCompleted>
+          }
+        />
+        <Route
+          path="/chat/:chatId"
+          element={
+            <RequireQuizCompleted>
+              <ChatPage />
+            </RequireQuizCompleted>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <RequireQuizCompleted>
+              <Settings />
+            </RequireQuizCompleted>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <RequireQuizCompleted>
+              <Profile />
+            </RequireQuizCompleted>
+          }
+        />
+        <Route path="/quiz" element={<QuizPage />} />
+      </Routes>
+    </div>
   );
 }
