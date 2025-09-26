@@ -56,45 +56,47 @@ export default function App() {
   );
 
   return (
-    <Routes>
-      {/* ✅ Updated home route with HeroSection */}
-      <Route path="/" element={<HeroSection />} />
+    <div className="App">
+      <Routes>
+        {/* ✅ Updated home route with HeroSection */}
+        <Route path="/" element={<HeroSection />} />
 
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<AuthPage type="signup" />} />
-      <Route
-        path="/dashboard"
-        element={
-          <RequireQuizCompleted>
-            <Dashboard />
-          </RequireQuizCompleted>
-        }
-      />
-      <Route
-        path="/chat/:chatId"
-        element={
-          <RequireQuizCompleted>
-            <ChatPage />
-          </RequireQuizCompleted>
-        }
-      />
-      <Route
-        path="/settings"
-        element={
-          <RequireQuizCompleted>
-            <Settings />
-          </RequireQuizCompleted>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <RequireQuizCompleted>
-            <Profile />
-          </RequireQuizCompleted>
-        }
-      />
-      <Route path="/quiz" element={<QuizPage />} />
-    </Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<AuthPage type="signup" />} />
+        <Route
+          path="/dashboard"
+          element={
+            <RequireQuizCompleted>
+              <Dashboard />
+            </RequireQuizCompleted>
+          }
+        />
+        <Route
+          path="/chat/:chatId"
+          element={
+            <RequireQuizCompleted>
+              <ChatPage />
+            </RequireQuizCompleted>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <RequireQuizCompleted>
+              <Settings />
+            </RequireQuizCompleted>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <RequireQuizCompleted>
+              <Profile />
+            </RequireQuizCompleted>
+          }
+        />
+        <Route path="/quiz" element={<QuizPage />} />
+      </Routes>
+    </div>
   );
 }
